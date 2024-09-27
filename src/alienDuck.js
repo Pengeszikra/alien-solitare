@@ -17,9 +17,10 @@
 /**
  *  @typedef { |
  *     'L1' | 'L2' | 'L3' | 'L4' | 'L5' | 'L6' | 
- *   'HERO' | 'A1' | 'A2' | 'S1' | 'A3' | 'S2'
+ *   'HERO' | 'A1' | 'A2' | 'A3' | 'S1' | 'S2'
  * } SlotId
  */
+
 
 /**
  * @typedef {{
@@ -28,16 +29,19 @@
  *  card: Card | null,
  *  isTarget: boolean,
  * }} TableSpot
+*/
+
+/**
+ * @typedef { Record<SlotId, TableSpot } Table
  */
 
 /**
  * @typedef {{
  * deck: Card[],
+ * lost: Card[],
  * fly: Card | null,
- * table: Record<TableSpot.id, TableSpot>,
- * hero: Card,
+ * table: Table,
  * end: false | 'THE END' | 'HAPPY END',
- * _result: string
  * }} State
  */
 
@@ -46,7 +50,7 @@
  * { type: "MOVE_CARD", payload: Card } |
  * { type: "DEAL_CARD", payload: Card } |
  * { type: "PLAY_CARD", payload: {actor:Card, slotId:SlotId } } |
- * { type: "RELEASE_CARD" } |
+ * { type: "RELEASE_CARD", payload: SlotId } |
  * { type: "CREATE_DECK", payload: Card[] } |
  * { type: "SHUFFLE_DECK" } |
  * { type: "DRAW_CARD" }
@@ -127,33 +131,23 @@ export const label = {
 
 /** @type {(card:Card, slotId: string, state: State) => State} */
 export const deployCard = (card, slotId, state) => {
-
-//   if (card.side === 'DARK' && ['HERO', 'ACTIVE'].includes(target.slot)) {
-//      if ( target.slot === 'HERO' || !target.card ) {
-//       const solutionLeft = state.hero.power - card.power;
-//       return solutionLeft > 0
-//         ? state
-//         : {...state, end: "THE END" }
-//     }
-// 
-//     // card:dark vs target.
-//     if (target?.card?.work === 'PROTECT') {
-//       return {...state, _result: 'card.pow - target.pow -> card.pow.left -- hero.pow | card.pow <= 0 -> drop card | target.pow = 0 -> target.drop'}
-//     }
-// 
-//   }
-
+  if (card.type === "HERO") {
+    return {...state, table: {...state.table, HERO: {...state.table.HERO, card}}}
+  }
   return state;
 };
 
-/** @type {(card:Card, table:TableSpot[]) => TableSpot[]} */
+/** @type {(card:Card, table:Table) => Table} */
 export const isPlaybleCheck = (card, table) => {
   return table;
 };
 
-/** @type {(table:TableSpot[]) => TableSpot[]} */
-export const releaseCard = (table) => {
-  return table.map(({isTarget, ...rest}) => ({isTarget: false, ...rest}));
+/** @type {(slotId:SlotId, state:State) => State} */
+export const releaseCard = (slotId, state) => {
+  if (state.table?.[slotId]?.card) return state;
+  const [card, ...deck] = state.deck;
+  const table = {...state.table, [slotId]: {...state.table[slotId], card}};
+  return {...state, table, deck};
 };
 
 /** @type {import("jsdoc-duck").Reducer<State, Quack>} */
@@ -162,7 +156,7 @@ export const reducer = (state, action) => {
     case "CREATE_DECK": return {...state, deck: action.payload };
     case "MOVE_CARD": return {...state, fly: action.payload, table: isPlaybleCheck(action.payload, state.table) };
     case "PLAY_CARD": return deployCard(action.payload.actor, action.payload.slotId, state);
-    case "RELEASE_CARD": return {...state, table: releaseCard(state.table) };
+    case "RELEASE_CARD": return releaseCard(action.payload, state);
     case "SHUFFLE_DECK": return {...state, deck: [...state.deck.sort(() => (Math.random() > .5 ? -1 : 1))]};
     default: return state;
   }
@@ -172,29 +166,16 @@ export const reducer = (state, action) => {
 export const setup = {
   deck: [],
   fly: null,
-  table: [
-    { id: "L1", card: null, slot: "LINE", isTarget: false },
-    { id: "L2", card: null, slot: "LINE", isTarget: false },
-    { id: "L3", card: null, slot: "LINE", isTarget: false },
-    { id: "L4", card: null, slot: "LINE", isTarget: false },
-    { id: "HERO", card: null, slot: "HERO", isTarget: false },
-    { id: "A1", card: null, slot: "ACTIVE", isTarget: false },
-    { id: "A2", card: null, slot: "ACTIVE", isTarget: false },
-    { id: "A3", card: null, slot: "STORE", isTarget: false },
-  ],
-  hero: {
-    id: "001",
-    name: "player",
-    power: 12,
-    maxPower: 12,
-    actionSlot: 2,
-    storeSlot: 1,
-    type: "HERO",
-    work: "",
-    side: "LIGHT",
-    src: "",
-    rule: ""
+  table: {
+    L1: { id: "L1", card: null, slot: "LINE", isTarget: false },
+    L2: { id: "L2", card: null, slot: "LINE", isTarget: false },
+    L3: { id: "L3", card: null, slot: "LINE", isTarget: false },
+    L4: { id: "L4", card: null, slot: "LINE", isTarget: false },
+    HERO: { id: "HERO", card: null, slot: "HERO", isTarget: false },
+    A1: { id: "A1", card: null, slot: "ACTIVE", isTarget: false },
+    A2: { id: "A2", card: null, slot: "ACTIVE", isTarget: false },
+    S1: { id: "S1", card: null, slot: "STORE", isTarget: false },
   },
+  lost: [],
   end: false,
-  _result: ""
 }
