@@ -4,8 +4,6 @@ _This is a submission for the [Web Game Challenge](https://dev.to/challenges/web
 A L I E N - S O L I T A R E 
 _powered by jsdoc-duck_
 
-![ufo theory](public/ufo-theory.png)
-
 **Technical Achievement:** I created a small jsDoc source React state handling npm module called: [jsdoc-duck](https://www.npmjs.com/package/jsdoc-duck) but until now I don't write any example application for it, I think this Challange is a right time for do it, and proof my module concept are working. Also proof the jsDoc working fine, and usable to typesafe JS coding without TypeScript.
 
 **Plagiarism:** Saddly my time is very limited, so a first moment I write down the base concept to my phone meanwhile of passenger of country drive ( 2hr ) in temux and vim. My plane was 2 or 3 day development time is need to be enough, but I am not the fastes developer. That why I choose this game method which is very lovely, mid complex, used by: [Card Crawl - base idea](https://play.google.com/store/apps/details?id=com.tinytouchtales.cardcrawl&hl=en_US), reworked that game mechanism to Alien theme.
@@ -17,10 +15,10 @@ Instead CSS I using **Tailwind**, but for simplify it is directly linked to html
 
 **Art:** A previous year I spended to create many (60K+) AI generated images with (dream.ai, clipDrop, ChatGPT) , so I have enough Sci-Fi related which is handy for this game.
 
+![ufo theory](public/ufo-theory.png)
+
 ## Demo
 <!-- You can directly embed your game and code into this post (see the FAQ section of the challenge page) or you can share links to your game and public repo. -->
-
-{% embed https://www.npmjs.com/package/jsdoc-duck?activeTab=readme %}
 
 ## Journey
 <!-- Tell us about your process, what you learned, anything you are particularly proud of, what you hope to do next, etc. -->
