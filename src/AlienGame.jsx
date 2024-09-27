@@ -3,28 +3,79 @@ import { useDuck } from "jsdoc-duck";
 import { label, reducer, setup } from "./alienDuck";
 import { cardCollection } from "./cardCollections";
 
+/** @type {(ms:number) => Promise<void>} */
+export const delay = (ms) => new Promise((release) => setTimeout(release, ms));
+
+/** @type {(quack:import("jsdoc-duck").Quack<import('./alienDuck').Quack>) => void} */
+const initialSaga = async (quack) => {
+  const [hero, ...deck] = cardCollection;
+  await delay(200)
+  quack.PLAY_CARD({ actor: hero, slotId: 'HERO' });
+  quack.CREATE_DECK(deck);
+  quack.SHUFFLE_DECK();
+  await delay(300)
+  quack.RELEASE_CARD('L1');
+  await delay(300)
+  quack.RELEASE_CARD('L2');
+  await delay(300)
+  quack.RELEASE_CARD('L3');
+  await delay(300)
+  quack.RELEASE_CARD('L4');
+  await delay(300)
+  quack.RELEASE_CARD('A2');
+};
+
 export const Target = ({ id }) => (
   <section data-zone={id} className="w-[200px] h-[300px] rounded-2xl border border-4 p-4 border-zinc-700 border-dashed">
   </section>
 )
 
 /** @param {import('./alienDuck').Card} */
-export const Card = ({ power, name, type, maxPower, side, id }) => (
-  <section data-zone={id} className="w-[200px] h-[300px] rounded-2xl border border-4 p-4 border-zinc-700 text-xl bg-zinc-900 text-zinc-300" draggable>
+export const Card = ({ power, name, type, maxPower, side, id }) => {
+  const [isDrag, setDrag] = useState(false);
+  return (
+  <section 
+    data-zone={id} 
+    className={`
+      w-[200px]
+      h-[300px]
+      rounded-2xl
+      border
+      border-4
+      p-4
+      border-zinc-700
+      text-xl
+      bg-zinc-900 
+      text-zinc-300
+      ${isDrag ? "border-dashed" : ""}
+    `}
+    draggable
+    onDragStart={(e) => {
+      setDrag(true);
+      console.log(`start: ${id}`)
+    }}
+    onDragEnd={() => setDrag(false)}
+  >
     <p className="pointer-events-none">{power}{type == "HERO" ? ` \\ ${maxPower}` : ''}</p>
     <p className="pointer-events-none max-w-[180px] text-wrap">{name}</p>
-    <p>{side}</p>
+    <p className="pointer-events-none">{side}</p>
   </section>
-);
+);}
 
 /** @param {Partial<import('./alienDuck').TableSpot>} */
 export const Slot = ({ card, id }) => {
   const [isOver, setOver] = useState(false);
   return (
     <pre className={`text-white ${isOver ? "opacity-50" : ""}`}
-      // onDragEnter={p => console.dir(p.target?.attributes?.['data-zone']?.nodeValue)}
-      onDragEnter={() => {console.dir(id); setOver(true)}}
-      onDragLeave={() => {setOver(false)}}
+    // onDragEnter={p => console.dir(p.target?.attributes?.['data-zone']?.nodeValue)}
+    onDragEnter={() => {console.dir(id); setOver(true)}}
+    onDragLeave={() => {setOver(false)}}
+    onDragOver={(e) => {e.preventDefault()}}
+    onDrop={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log(`end: ${id}`)
+    }}
     >
       {card
         ? <Card {...card} />
@@ -38,14 +89,7 @@ export const AlienGame = () => {
   const [state, quack] = useDuck(reducer, setup, label);
 
   useEffect(() => {
-    const [hero, ...deck] = cardCollection;
-    quack.PLAY_CARD({ actor: hero, slotId: 'HERO' });
-    quack.CREATE_DECK(deck);
-    quack.SHUFFLE_DECK();
-    quack.RELEASE_CARD('L1');
-    quack.RELEASE_CARD('L2');
-    quack.RELEASE_CARD('L3');
-    quack.RELEASE_CARD('L4');
+    initialSaga(quack);
   }, [quack]);
 
   return (
