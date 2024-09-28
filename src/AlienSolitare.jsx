@@ -1,5 +1,3 @@
-import { pictures } from './list';
-
 /**
  * @typedef {{
  * type: 'spaceship' | 'gadget' | 'alien' | 'treasure' | 'location' | 'action' | 'hero',
@@ -54,7 +52,7 @@ export const irr = () => Math.random() * pictures.length | 0;
 
 export const Card = ({type, name, store, action, id, solution, problem, mode, iidx}) => (
   <div className="rounded-2xl border border-zinc-800 w-[200px] h-[250px] p-2" draggable> 
-    <img src={pictures[iidx]} className='pointer-events-none'/>
+    {/* <img src={pictures[iidx]} className='pointer-events-none'/> */}
     {/* <p>type: {type}</p>
     <p>name: {name}</p>
     <p>store: {store}</p>

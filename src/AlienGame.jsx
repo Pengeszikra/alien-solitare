@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useDuck } from "jsdoc-duck";
 import { label, reducer, setup } from "./alienDuck";
 import { cardCollection } from "./cardCollections";
+import { images } from "./list";
 
 /** @type {(ms:number) => Promise<void>} */
 export const delay = (ms) => new Promise((release) => setTimeout(release, ms));
@@ -48,6 +49,13 @@ export const Card = ({ power, name, type, maxPower, side, id }) => {
       bg-zinc-900 
       text-zinc-300
       ${isDrag ? "border-dashed" : ""}
+      bg-[url('${images[Number(id.split('').slice(1).join(''))]}')]
+      bg-contain
+      bg-bottom
+      hover:bg-cover
+      hover:bg-center
+      bg-no-repeat
+      hover:text-orange-300
     `}
     draggable
     onDragStart={(e) => {
