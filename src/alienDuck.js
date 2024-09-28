@@ -71,6 +71,7 @@ import { images } from "./arts";
  * { type: "CREATE_DECK", payload: Card[] } |
  * { type: "SHUFFLE_DECK" } |
  * { type: "GO_ON", payload: Phases } |
+ * { type: "WHAT_IS_NEXT" } |
  * { type: "DRAW_CARD" }
  * } Actions
  */
@@ -91,12 +92,15 @@ export const label = {
   DRAG_START: "DRAG_START",
   DRAG_END: "DRAG_END",
   GO_ON: "GO_ON",
+  WHAT_IS_NEXT: "WHAT_IS_NEXT",
 };
 
 /** @type {(card:Card, slotId: string, state: State) => State} */
 export const deployCard = (card, slotId, state) => {
   console.log(slotId, state.fly)
   const {from, to, actor} = state.fly;
+
+  // if everything is oke this code are put card to a new place
   try {
     const table = (from === to || state.table[to].card)
       ? state.table
@@ -128,6 +132,7 @@ export const releaseCard = (slotId, state) => {
 
 /** @type {import("jsdoc-duck").Reducer<State, Actions>} */
 export const reducer = (state, action) => {
+  // console.log(action)
   switch(action.type) {
     case "CREATE_DECK": return {...state, deck: action.payload.map((card) => ({...card, src:images[Math.random() * images.length | 0]})) };
     case "MOVE_CARD": return {...state, fly: action.payload, table: isPlaybleCheck(action.payload, state.table) };
@@ -137,6 +142,15 @@ export const reducer = (state, action) => {
     case "DRAG_START": return {...state, fly: action.payload };
     case "DRAG_END": return {...state, fly: {...state.fly, to:action.payload}};
     case "GO_ON": return {...state, phases: action.payload};
+    case "WHAT_IS_NEXT": return [
+      state.table.L1,
+      state.table.L2,
+      state.table.L3,
+      state.table.L4,
+    ].filter(spot => spot.card === null).length >= 3
+      ? {...state, phases: "STORY_GOES_ON"}
+      : state
+      ;
     default: return state;
   }
 };
