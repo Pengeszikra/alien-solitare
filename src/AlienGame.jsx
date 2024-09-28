@@ -6,6 +6,8 @@ import { cardCollection } from "./cardCollections";
 /** @type {(ms:number) => Promise<void>} */
 export const delay = (ms) => new Promise((release) => setTimeout(release, ms));
 
+export const descend = (a,b) => a > b ? -1 : 1;
+
 /** @type {(quack: import('./alienDuck').Quack) => void} */
 const initialSaga = async (quack) => {
   const moment = 300;
@@ -42,12 +44,13 @@ export const Target = ({ id }) => (
  * @returns {JSX.Element}
  */
 export const Card = ({card, quack, slotId}) => {
-  const { power, name, type, maxPower, side, id, src } = card;
+  const { power, name, type, maxPower, side, id, src, work } = card;
   const [isDrag, setDrag] = useState(false);
   return (
   <section 
     data-zone={id} 
     className={`
+      relative
       w-[200px]
       h-[300px]
       ${isDrag && false ? "z-10 w-[300px] h-[200px]" : ""}
@@ -82,9 +85,13 @@ export const Card = ({card, quack, slotId}) => {
       setDrag(false)
     }}
   >
-    <p className="pointer-events-none">{power}{type == "HERO" ? ` \\ ${maxPower}` : ''}</p>
+    {type == "HERO" 
+      ? <p className="pointer-events-none">{power} \ {maxPower}</p>
+      : <p className="pointer-events-none absolute right-4">{power}</p>
+    }
+    {type !== "HERO" && <p className={`pointer-events-none ${side === "DARK" ? "text-zinc-600" : side === "NEUTRAL"  ?  "text-sky-600": ""}`}>{side}</p>}
     <p className="pointer-events-none max-w-[180px] text-wrap">{name}</p>
-    <p className="pointer-events-none">{side}</p>
+    <p className="pointer-events-none text-green-500 text-sm">{work}</p>
   </section>
 );}
 
@@ -127,6 +134,7 @@ export const AlienGame = () => {
     const phaser = async() => {
       switch (state.phases) {
         case "BEGIN": return initialSaga(quack);
+        // case "BEGIN": quack.CREATE_DECK(cardCollection)
       }
     };
     phaser();
@@ -160,14 +168,24 @@ export const AlienGame = () => {
           </section>
         </section>
 
-        <pre className="pointer-events-none select-none">
+        <pre className="pointer-events-none select-none hidden">
           <p className="text-green-700 py-4">At this point content is a mass of chaos</p>
           {JSON.stringify({...state, deck: state.deck.length}, null, 2)}
         </pre>
 
         {/* <img src={'ufo-theory.png'} /> */}
 
-        <section className="grid gap-4 grid-cols-1 place-items-start hidden">
+        <section className="grid gap-4 grid-cols-1 place-items-start -hidden">
+          <h1 className="p-4">D E C K</h1>
+          <pre>{JSON.stringify({
+            hostile: state.deck.filter(card => card.side === "DARK" && card.work === "HIT").map(card => card.power).sort(descend).join(),
+            fighter: state.deck.filter(card => card.side === "LIGHT" && card.work === "HIT").map(card => card.power).sort(descend).join(),
+            survivor: state.deck.filter(card => card.side === "LIGHT" && card.work === "PROTECT").map(card => card.power).sort(descend).join(),
+            medicine: state.deck.filter(card => card.side === "LIGHT" && card.work === "RAISE").map(card => card.power).sort(descend).join(),
+            assets: state.deck.filter(card => ["NEUTRAL", "LIGHT"].includes(card.side) && card.work === "WORTH").map(card => card.power).sort(descend).join(),
+            skill: state.deck.filter(card => card.side === "LIGHT" && card.work === "SKILL").map(card => card.name).join(),
+            debug: state.deck.filter(card => !["DARK", "NEUTRAL", "LIGHT"].includes(card.side)).map(card => card.id).join(),
+          }, null, 2)}</pre>
         <section className="grid gap-4 grid-cols-4 ">
           {state.deck.map((card) => <Card key={card.id} card={card}  />)}
         </section>

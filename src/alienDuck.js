@@ -9,8 +9,8 @@ import { images } from "./arts";
  *   actionSlot: number,
  *   storeSlot: number,
  *   type: 'HERO' | 'ALIEN' | 'SPACE-SHIP' | 'LOCATION' | 'GADGET' | 'STORY' | 'LOOT',
- *   work: 'PROTECT' | 'CAUSE' | 'RAISE' | 'SKILL' | '',
- *   side: 'DARK' | 'LIGHT' | ''
+ *   work: 'PROTECT' | 'HIT' | 'RAISE' | 'SKILL' | 'WORTH' | '',
+ *   side: 'DARK' | 'LIGHT' | 'NEUTRAL'
  *   src: string;
  *   rule: string;
  * }} Card
@@ -32,7 +32,19 @@ import { images } from "./arts";
  * }} TableSpot
 */
 
-/** @typedef { 'BEGIN' | 'STORY_GOES_ON' | 'SOLITARE' | 'THE_END' | 'HAPPY_END' } Phases */
+/** 
+ * STORY_GOES_ON & SOLITARE :: game rounds
+ * 
+ * BURN_OUT means the problems are owervhelming us :: THE-END
+ * 
+ * SURVIVE  means we capable to handle the problem :: HAPPY-END
+ * 
+ * @typedef { |
+ *  'BEGIN' | 
+ *  'STORY_GOES_ON' | 'SOLITARE' | 
+ *  'BURN_OUT' | 'SURVIVE' 
+ * } Phases 
+ */
 
 /**
  * @typedef { Record<SlotId, TableSpot } Table
