@@ -8,18 +8,25 @@ export const delay = (ms) => new Promise((release) => setTimeout(release, ms));
 
 /** @type {(quack: import('./alienDuck').Quack) => void} */
 const initialSaga = async (quack) => {
-  await delay(200)
+  const moment = 300;
+  await delay(moment /  2);
   quack.CREATE_DECK(cardCollection);
   quack.RELEASE_CARD('HERO'); // hero card are top on initial deck
   quack.SHUFFLE_DECK();
-  await delay(300)
+  
+  quack.GO_ON("STORY_GOES_ON");
+  
+  await delay(moment);
   quack.RELEASE_CARD('L1');
-  await delay(300)
+  await delay(moment);
   quack.RELEASE_CARD('L2');
-  await delay(300)
+  await delay(moment);
   quack.RELEASE_CARD('L3');
-  await delay(300)
+  await delay(moment);
   quack.RELEASE_CARD('L4');
+  await delay(moment);
+  
+  quack.GO_ON("SOLITARE");
 };
 
 export const Target = ({ id }) => (
@@ -30,8 +37,8 @@ export const Target = ({ id }) => (
 /** 
  * @param {Object} props
  * @param {import('./alienDuck').Card} props.card
- * @param {import('./alienDuck').Quack} props.quack
- * @param {import('./alienDuck').SlotId} props.slotId
+ * @param {import('./alienDuck').Quack} props.quack?
+ * @param {import('./alienDuck').SlotId} props.slotId?
  * @returns {JSX.Element}
  */
 export const Card = ({card, quack, slotId}) => {
@@ -64,7 +71,7 @@ export const Card = ({card, quack, slotId}) => {
 
       hover:text-orange-300
     `}
-    draggable
+    draggable={!!quack?.DRAG_START}
     onDragStart={() => {
       setDrag(true);
       // console.log(`start: ${id}`);
@@ -101,6 +108,7 @@ export const Slot = ({ slot:{card, id}, quack }) => {
       e.preventDefault();
       e.stopPropagation();
       quack.DRAG_END(id);
+      setOver(false);
       // console.log(`end: ${id}`, card)
     }}
     >
@@ -116,15 +124,20 @@ export const AlienGame = () => {
   const [state, quack] = useDuck(reducer, setup, label);
 
   useEffect(() => {
-    initialSaga(quack);
-  }, [quack]);
+    const phaser = async() => {
+      switch (state.phases) {
+        case "BEGIN": return initialSaga(quack);
+      }
+    };
+    phaser();
+  }, [state.phases, quack]);
 
   return (
     <main className="bg-black text-zinc-200 --bg-[url('ufo-theory.png')]">
       <article className="relative p-4">
         <pre className="pointer-events-none select-none">{`
           A L I E N - S O L I T A R E
-          powered by: jsdoc-duck        future:${state.deck.length} past: 0
+          powered by: jsdoc-duck        future:${state.deck.length} past: 0 phases:${state.phases}
           `}
         </pre>
 
@@ -149,10 +162,16 @@ export const AlienGame = () => {
 
         <pre className="pointer-events-none select-none">
           <p className="text-green-700 py-4">At this point content is a mass of chaos</p>
-          {JSON.stringify(state.fly, null, 2)}
+          {JSON.stringify({...state, deck: state.deck.length}, null, 2)}
         </pre>
 
-        <img src={'ufo-theory.png'} />
+        {/* <img src={'ufo-theory.png'} /> */}
+
+        <section className="grid gap-4 grid-cols-1 place-items-start hidden">
+        <section className="grid gap-4 grid-cols-4 ">
+          {state.deck.map((card) => <Card key={card.id} card={card}  />)}
+        </section>
+        </section>
       </article>
     </main>
   );

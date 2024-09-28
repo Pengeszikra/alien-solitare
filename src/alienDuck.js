@@ -16,14 +16,12 @@ import { images } from "./arts";
  * }} Card
  */
 
-
 /**
  *  @typedef { |
  *     'L1' | 'L2' | 'L3' | 'L4' | 'L5' | 'L6' | 
  *   'HERO' | 'A1' | 'A2' | 'A3' | 'S1' | 'S2'
  * } SlotId
  */
-
 
 /**
  * @typedef {{
@@ -33,6 +31,8 @@ import { images } from "./arts";
  *  isTarget: boolean,
  * }} TableSpot
 */
+
+/** @typedef { 'BEGIN' | 'STORY_GOES_ON' | 'SOLITARE' | 'THE_END' | 'HAPPY_END' } Phases */
 
 /**
  * @typedef { Record<SlotId, TableSpot } Table
@@ -44,7 +44,7 @@ import { images } from "./arts";
  * lost: Card[],
  * fly: { from: SlotId, to?: SlotId, card: Card },
  * table: Table,
- * end: false | 'THE END' | 'HAPPY END',
+ * phases: Phases,
  * }} State
  */
 
@@ -58,6 +58,7 @@ import { images } from "./arts";
  * { type: "RELEASE_CARD", payload: SlotId } |
  * { type: "CREATE_DECK", payload: Card[] } |
  * { type: "SHUFFLE_DECK" } |
+ * { type: "GO_ON", payload: Phases } |
  * { type: "DRAW_CARD" }
  * } Actions
  */
@@ -77,73 +78,27 @@ export const label = {
   DEAL_CARD: "DEAL_CARD",
   DRAG_START: "DRAG_START",
   DRAG_END: "DRAG_END",
+  GO_ON: "GO_ON",
 };
-
-// call the DECK -> SCENE
-
-/*
-
-  [ possible drag-to interaction ]
-
-  switch card:dark from slot:LINE
-    drag-to target.slot:[HERO,ACTIVE]
-      if target.card != HERO && target.card:PROTECT
-        taget.card.pow -=0=- card.pow
-          - target.card may drop
-          - card may drop
-  if card:dark.power:left > 0 coniue on next entry
-
-  drag-to target.slot:[HERO,ACTIVE:empty]
-      target.card.pow -=0=- hero.pow
-        - target.card may drop
-        - hero may drop -> lose the game: THE_END
-
-  switch card:light from slot:LINE
-    drag-to target.slot:ACTIVE:empty
-      then deploy
-    drag-to target.slot:STORE:empty
-      then deploy
-
-  switch card:light from slot:STORE
-  drag-to target.slot:ACTIVE:empty
-    then deploy
-
-  switch card:light from slot:ACTIVE
-    if card:light:CAUSE
-      drag-to target.slot.LINE:card.dark
-        target.card.pow -=0=- card:light.pow
-          - may card:light drop
-          - may target.card drop
-
-    if card:light:SKILL
-      drag-to target.slot:HERO
-        then use SKILL on HERO
-      drag-to target.slot:LINE:card
-        then use SKILL on target card in line
-      darg-to target.slot:ACTIVE:card
-        then use SKILL on target card in active
-      drag-to target.slot:STORE:card
-        then use SKILL on target card in store
-
-  [ on drop card check ]
-
-  drop HERO
-    THE_END
-
-  drop any card chek the LINE(s)
-  if only 1 LINE have card
-    RELEASE_CARD as many LINE:empty left, max SECENE.length
-
-  if SCENE:empty then play until all LINE card are played
-
-  if SCENE:empty and LINEs:empty and HERO.pow > 0
-    then HAPPY_END
-*/
 
 /** @type {(card:Card, slotId: string, state: State) => State} */
 export const deployCard = (card, slotId, state) => {
   console.log(slotId, state.fly)
-  return {...state, fly: null};
+  const {from, to, actor} = state.fly;
+  try {
+    const table = (from === to || state.table[to].card)
+      ? state.table
+      : {
+          ...state.table,
+          [from]: {...state.table[from], card: null},
+          [to]: {...state.table[to], card: actor}
+        }
+      ;
+    return {...state, table, fly: null};
+  } catch (error) {
+    console.error(error);
+    return {...state, fly:null};
+  }
 };
 
 /** @type {(card:Card, table:Table) => Table} */
@@ -169,6 +124,7 @@ export const reducer = (state, action) => {
     case "SHUFFLE_DECK": return {...state, deck: [...state.deck.sort(() => (Math.random() > .5 ? -1 : 1))]};
     case "DRAG_START": return {...state, fly: action.payload };
     case "DRAG_END": return {...state, fly: {...state.fly, to:action.payload}};
+    case "GO_ON": return {...state, phases: action.payload};
     default: return state;
   }
 };
@@ -188,5 +144,5 @@ export const setup = {
     A2: { id: "A2", card: null, slot: "ACTIVE", isTarget: false },
     S1: { id: "S1", card: null, slot: "STORE", isTarget: false },
   },
-  end: false,
+  phases: "BEGIN",
 }
