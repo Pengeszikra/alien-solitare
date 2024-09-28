@@ -2,17 +2,16 @@ import { useEffect, useState } from "react";
 import { useDuck } from "jsdoc-duck";
 import { label, reducer, setup } from "./alienDuck";
 import { cardCollection } from "./cardCollections";
-import { images } from "./list";
+import { images } from "./arts";
 
 /** @type {(ms:number) => Promise<void>} */
 export const delay = (ms) => new Promise((release) => setTimeout(release, ms));
 
 /** @type {(quack:import("jsdoc-duck").Quack<import('./alienDuck').Quack>) => void} */
 const initialSaga = async (quack) => {
-  const [hero, ...deck] = cardCollection;
   await delay(200)
-  quack.PLAY_CARD({ actor: hero, slotId: 'HERO' });
-  quack.CREATE_DECK(deck);
+  quack.CREATE_DECK(cardCollection);
+  quack.RELEASE_CARD('HERO');
   quack.SHUFFLE_DECK();
   await delay(300)
   quack.RELEASE_CARD('L1');
@@ -32,7 +31,7 @@ export const Target = ({ id }) => (
 )
 
 /** @param {import('./alienDuck').Card} */
-export const Card = ({ power, name, type, maxPower, side, id }) => {
+export const Card = ({ power, name, type, maxPower, side, id, src }) => {
   const [isDrag, setDrag] = useState(false);
   return (
   <section 
@@ -43,18 +42,20 @@ export const Card = ({ power, name, type, maxPower, side, id }) => {
       rounded-2xl
       border
       border-4
+      border-opacity-75
       p-4
-      border-zinc-700
+      border-zinc-800
       text-xl
       bg-zinc-900 
       text-zinc-300
       ${isDrag ? "border-dashed" : ""}
-      bg-[url('${images[Number(id.split('').slice(1).join(''))]}')]
-      bg-contain
+      bg-[linear-gradient(rgba(0,0,0,1),rgba(0,0,0,0)),url('${src}')]
+      bg-height-[20%, 100%]
+      --hover:bg-contain
       bg-bottom
-      hover:bg-cover
-      hover:bg-center
+      bg-cover
       bg-no-repeat
+
       hover:text-orange-300
     `}
     draggable
@@ -128,6 +129,8 @@ export const AlienGame = () => {
           <p className="text-green-700 py-4">Let do some real coding work like a hacker.</p>
           {JSON.stringify(state.table, null, 2)}
         </pre>
+
+        <img src={'ufo-theory.png'} />
       </article>
     </main>
   );

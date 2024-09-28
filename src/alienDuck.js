@@ -1,3 +1,5 @@
+import { images } from "./arts";
+
 /**
  * @typedef {{
  *   id: string,
@@ -13,6 +15,7 @@
  *   rule: string;
  * }} Card
  */
+
 
 /**
  *  @typedef { |
@@ -153,7 +156,7 @@ export const releaseCard = (slotId, state) => {
 /** @type {import("jsdoc-duck").Reducer<State, Quack>} */
 export const reducer = (state, action) => {
   switch(action.type) {
-    case "CREATE_DECK": return {...state, deck: action.payload };
+    case "CREATE_DECK": return {...state, deck: action.payload.map((card) => ({...card, src:images[Math.random() * images.length | 0]})) };
     case "MOVE_CARD": return {...state, fly: action.payload, table: isPlaybleCheck(action.payload, state.table) };
     case "PLAY_CARD": return deployCard(action.payload.actor, action.payload.slotId, state);
     case "RELEASE_CARD": return releaseCard(action.payload, state);
