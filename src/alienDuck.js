@@ -42,7 +42,7 @@ import { images } from "./arts";
  * @typedef {{
  * deck: Card[],
  * lost: Card[],
- * fly: Card | null,
+ * fly: { from: SlotId, to?: SlotId, card: Card },
  * table: Table,
  * end: false | 'THE END' | 'HAPPY END',
  * }} State
@@ -52,15 +52,21 @@ import { images } from "./arts";
  * @typedef { |
  * { type: "MOVE_CARD", payload: Card } |
  * { type: "DEAL_CARD", payload: Card } |
+ * { type: "DRAG_START", payload: {from:SlotId, card:Card} } |
+ * { type: "DRAG_END", payload: SlotId } |
  * { type: "PLAY_CARD", payload: {actor:Card, slotId:SlotId } } |
  * { type: "RELEASE_CARD", payload: SlotId } |
  * { type: "CREATE_DECK", payload: Card[] } |
  * { type: "SHUFFLE_DECK" } |
  * { type: "DRAW_CARD" }
- * } Quack
+ * } Actions
  */
 
-/** @type {import("jsdoc-duck").Labels<Quack>} */
+/**
+ * @typedef {import("jsdoc-duck").Quack<Actions>} Quack
+ */
+
+/** @type {import("jsdoc-duck").Labels<Actions>} */
 export const label = {
   MOVE_CARD: "MOVE_CARD",
   CREATE_DECK: "CREATE_DECK",
@@ -68,7 +74,9 @@ export const label = {
   DRAW_CARD: "DRAW_CARD",
   PLAY_CARD: "PLAY_CARD",
   RELEASE_CARD: "RELEASE_CARD",
-  DEAL_CARD: "DEAL_CARD"
+  DEAL_CARD: "DEAL_CARD",
+  DRAG_START: "DRAG_START",
+  DRAG_END: "DRAG_END",
 };
 
 // call the DECK -> SCENE
@@ -134,10 +142,8 @@ export const label = {
 
 /** @type {(card:Card, slotId: string, state: State) => State} */
 export const deployCard = (card, slotId, state) => {
-  if (card.type === "HERO") {
-    return {...state, table: {...state.table, HERO: {...state.table.HERO, card}}}
-  }
-  return state;
+  console.log(slotId, state.fly)
+  return {...state, fly: null};
 };
 
 /** @type {(card:Card, table:Table) => Table} */
@@ -153,7 +159,7 @@ export const releaseCard = (slotId, state) => {
   return {...state, table, deck};
 };
 
-/** @type {import("jsdoc-duck").Reducer<State, Quack>} */
+/** @type {import("jsdoc-duck").Reducer<State, Actions>} */
 export const reducer = (state, action) => {
   switch(action.type) {
     case "CREATE_DECK": return {...state, deck: action.payload.map((card) => ({...card, src:images[Math.random() * images.length | 0]})) };
@@ -161,6 +167,8 @@ export const reducer = (state, action) => {
     case "PLAY_CARD": return deployCard(action.payload.actor, action.payload.slotId, state);
     case "RELEASE_CARD": return releaseCard(action.payload, state);
     case "SHUFFLE_DECK": return {...state, deck: [...state.deck.sort(() => (Math.random() > .5 ? -1 : 1))]};
+    case "DRAG_START": return {...state, fly: action.payload };
+    case "DRAG_END": return {...state, fly: {...state.fly, to:action.payload}};
     default: return state;
   }
 };
@@ -168,6 +176,7 @@ export const reducer = (state, action) => {
 /** @type {State} */
 export const setup = {
   deck: [],
+  lost: [],
   fly: null,
   table: {
     L1: { id: "L1", card: null, slot: "LINE", isTarget: false },
@@ -179,6 +188,5 @@ export const setup = {
     A2: { id: "A2", card: null, slot: "ACTIVE", isTarget: false },
     S1: { id: "S1", card: null, slot: "STORE", isTarget: false },
   },
-  lost: [],
   end: false,
 }

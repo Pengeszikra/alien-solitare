@@ -2,16 +2,15 @@ import { useEffect, useState } from "react";
 import { useDuck } from "jsdoc-duck";
 import { label, reducer, setup } from "./alienDuck";
 import { cardCollection } from "./cardCollections";
-import { images } from "./arts";
 
 /** @type {(ms:number) => Promise<void>} */
 export const delay = (ms) => new Promise((release) => setTimeout(release, ms));
 
-/** @type {(quack:import("jsdoc-duck").Quack<import('./alienDuck').Quack>) => void} */
+/** @type {(quack: import('./alienDuck').Quack) => void} */
 const initialSaga = async (quack) => {
   await delay(200)
   quack.CREATE_DECK(cardCollection);
-  quack.RELEASE_CARD('HERO');
+  quack.RELEASE_CARD('HERO'); // hero card are top on initial deck
   quack.SHUFFLE_DECK();
   await delay(300)
   quack.RELEASE_CARD('L1');
@@ -21,8 +20,6 @@ const initialSaga = async (quack) => {
   quack.RELEASE_CARD('L3');
   await delay(300)
   quack.RELEASE_CARD('L4');
-  await delay(300)
-  quack.RELEASE_CARD('A2');
 };
 
 export const Target = ({ id }) => (
@@ -30,8 +27,15 @@ export const Target = ({ id }) => (
   </section>
 )
 
-/** @param {import('./alienDuck').Card} */
-export const Card = ({ power, name, type, maxPower, side, id, src }) => {
+/** 
+ * @param {Object} props
+ * @param {import('./alienDuck').Card} props.card
+ * @param {import('./alienDuck').Quack} props.quack
+ * @param {import('./alienDuck').SlotId} props.slotId
+ * @returns {JSX.Element}
+ */
+export const Card = ({card, quack, slotId}) => {
+  const { power, name, type, maxPower, side, id, src } = card;
   const [isDrag, setDrag] = useState(false);
   return (
   <section 
@@ -39,6 +43,8 @@ export const Card = ({ power, name, type, maxPower, side, id, src }) => {
     className={`
       w-[200px]
       h-[300px]
+      ${isDrag && false ? "z-10 w-[300px] h-[200px]" : ""}
+      ${isDrag && "invisible" ? "" : ""}
       rounded-2xl
       border
       border-4
@@ -59,11 +65,15 @@ export const Card = ({ power, name, type, maxPower, side, id, src }) => {
       hover:text-orange-300
     `}
     draggable
-    onDragStart={(e) => {
+    onDragStart={() => {
       setDrag(true);
-      console.log(`start: ${id}`)
+      // console.log(`start: ${id}`);
+      quack.DRAG_START({actor:card, from:slotId})
     }}
-    onDragEnd={() => setDrag(false)}
+    onDragEnd={() => {
+      quack.PLAY_CARD({actor:card, slotId})
+      setDrag(false)
+    }}
   >
     <p className="pointer-events-none">{power}{type == "HERO" ? ` \\ ${maxPower}` : ''}</p>
     <p className="pointer-events-none max-w-[180px] text-wrap">{name}</p>
@@ -71,8 +81,15 @@ export const Card = ({ power, name, type, maxPower, side, id, src }) => {
   </section>
 );}
 
-/** @param {Partial<import('./alienDuck').TableSpot>} */
-export const Slot = ({ card, id }) => {
+/**
+ * Renders a Slot component that can accept a card and handle drag-and-drop functionality.
+ * 
+ * @param {Object} props
+ * @param {Partial<import('./alienDuck').TableSpot>} props.slot 
+ * @param {import('./alienDuck').Quack} props.quack
+ * @returns {JSX.Element}
+ */
+export const Slot = ({ slot:{card, id}, quack }) => {
   const [isOver, setOver] = useState(false);
   return (
     <pre className={`text-white ${isOver ? "opacity-50" : ""}`}
@@ -83,11 +100,12 @@ export const Slot = ({ card, id }) => {
     onDrop={(e) => {
       e.preventDefault();
       e.stopPropagation();
-      console.log(`end: ${id}`)
+      quack.DRAG_END(id);
+      // console.log(`end: ${id}`, card)
     }}
     >
       {card
-        ? <Card {...card} />
+        ? <Card card={card} quack={quack} slotId={id} />
         : <Target id={id} />
       }
     </pre>
@@ -112,22 +130,26 @@ export const AlienGame = () => {
 
         <section className="grid gap-4 grid-cols-1 place-items-start">
           <section className="grid gap-4 grid-cols-4">
-            <Slot {...state.table.L1} />
-            <Slot {...state.table.L2} />
-            <Slot {...state.table.L3} />
-            <Slot {...state.table.L4} />
+            {[
+              state.table.L1,
+              state.table.L2,
+              state.table.L3,
+              state.table.L4
+            ].map(slot => <Slot key={slot.id} slot={slot} quack={quack} />)}
           </section>
           <section className="grid gap-4 grid-cols-4">
-            <Slot {...state.table.HERO} />
-            <Slot {...state.table.A1} />
-            <Slot {...state.table.A2} />
-            <Slot {...state.table.S1} />
+          {[
+              state.table.HERO,
+              state.table.A1,
+              state.table.A2,
+              state.table.S1
+            ].map(slot => <Slot key={slot.id} slot={slot} quack={quack} />)}
           </section>
         </section>
 
         <pre className="pointer-events-none select-none">
-          <p className="text-green-700 py-4">Let do some real coding work like a hacker.</p>
-          {JSON.stringify(state.table, null, 2)}
+          <p className="text-green-700 py-4">At this point content is a mass of chaos</p>
+          {JSON.stringify(state.fly, null, 2)}
         </pre>
 
         <img src={'ufo-theory.png'} />
