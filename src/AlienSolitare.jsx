@@ -68,6 +68,7 @@ export const Card = ({ card, quack, slotId, phases }) => {
       bg-cover
       bg-no-repeat
       hover:text-orange-300
+      select-none
     `}
       draggable={!!quack?.DRAG_START && phases == "SOLITARE"}
       onDragStart={() => {
@@ -150,9 +151,6 @@ export const AlienSolitare = () => {
       switch (state.phases) {
         case "BEGIN": return initialSaga(quack);
         case "STORY_GOES_ON": return storyGoesOnSaga(quack);
-        case "SOLITARE": return;
-        case "BURN_OUT": return;
-        case "SURVIVE": return;
       }
     };
     phaser();
@@ -170,7 +168,7 @@ export const AlienSolitare = () => {
       <article className="relative p-4">
         <pre className="pointer-events-none select-none">{`
       A L I E N - S O L I T A R E
-      powered by: jsdoc-duck       future: ${state.deck.length} past: 0 phases: ${state.phases} score: ${state.score}
+      powered by: jsdoc-duck       future: ${state.deck.length} past: ${state.lost.length} phases: ${state.phases} score: ${state.score}
           `}
         </pre>
 
@@ -194,7 +192,7 @@ export const AlienSolitare = () => {
         </section>
 
         {state.phases === "BURN_OUT" && (
-          <article className="bg-red-800 rounded-2xl text-white text-3xl p-8 absolute z-10 top-36 left-8 w-[800px]">
+          <article onClick={() => quack.GO_ON("BEGIN")} className="bg-red-800 rounded-2xl text-white text-3xl p-8 absolute z-10 top-36 left-8 w-[800px] select-none">
             Mission was failed, captain you are Burn Out! 
             <img src="Z0eTLnOV.jpg" className="my-4"/>
             <p className="text-sm">Use the reset please (Ctrl + R)</p>
@@ -202,14 +200,14 @@ export const AlienSolitare = () => {
         )} 
 
         {state.phases === "SURVIVE" && (
-          <article className="bg-green-800 rounded-2xl text-white text-3xl p-8 absolute z-10 top-36 left-8 w-[800px]">
+          <article onClick={() => quack.GO_ON("BEGIN")} className="bg-green-800 rounded-2xl text-white text-3xl p-8 absolute z-10 top-36 left-8 w-[800px] select-none">
             Congratulation captain 4 Mission!
             <img src="tFJJ4ggf.jpg" className="my-4"/>
             <p className="text-sm">Use the reset please (Ctrl + R)</p>
           </article>
         )} 
 
-        <pre className="pointer-events-none select-none hidden">
+        <pre className="pointer-events-none select-none --hidden">
           <p className="text-green-700 py-4">Near to a first working gameplay, just I documenting a lot.</p>
           {JSON.stringify({ ...state, deck: state.deck.length }, null, 2)}
         </pre>

@@ -132,8 +132,8 @@ export const playCard = (card, slotId, state) => {
             [from]: { ...table[from], card: null },
             [to]: { ...table[to], card },
           },
-          ...extra,
           fly: null,
+          ...extra,
         });
         console.log('playOnTable :: ', result)
         return result;
@@ -148,9 +148,24 @@ export const playCard = (card, slotId, state) => {
         console.log('move::', move)
         const { table } = state;
         switch (move.join()) {
-          case _(["LINE", "HERO", "STRANGE", "ENGAGE"]):
-            // console.warn('strange engage vs Hero');
-            return playOnTable(table); // beat my captain
+          case _(["LINE", "HERO", "STRANGE", "ENGAGE"]): {
+            const captain = table.HERO.card;
+            const [solution, problem] = [captain.power, card.power];
+            const conflict = Math.min(solution, problem);
+            captain.power -= conflict;
+            card.power -= conflict;
+
+            return {
+              ...state,
+              table: {
+                ...table,
+                [from]: {...table[from], card: null},
+                HERO: {...table.HERO, card: captain}
+              },
+              lost: [...state.lost, card],
+              fly: null
+            }
+          }
 
           case _(["LINE", "ACTIVE", "STRANGE", "ENGAGE"]):
             // console.warn('strange engage vs ally');
@@ -164,16 +179,17 @@ export const playCard = (card, slotId, state) => {
           case _(["STORE", "ACTIVE", "ALLY", "FIX"]):
           case _(["STORE", "ACTIVE", "ALLY", "GUARD"]):
           case _(["STORE", "ACTIVE", "ALLY", "SKILL"]):
-            // console.warn('something will activate');
-            return playOnTable(table);
+            return table[to].card 
+              ? state 
+              : playOnTable(table)
+              ;
 
           case _(["LINE", "ACTIVE", "NEUTRAL", "WORTH"]):
           case _(["LINE", "ACTIVE", "ALLY", "WORTH"]):
-            if (!state.table[to].card) {
-              // console.warn('earn score');
-              return playOnTable(table, { score: state.score + card.power });
-            }
-            return state;
+            return state.table[to].card 
+              ? state
+              : playOnTable(table, { score: state.score + card.power })
+              ;
 
           case _(["LINE", "STORE", "ALLY", "FIX"]):
           case _(["LINE", "STORE", "ALLY", "ENGAGE"]):
@@ -183,7 +199,18 @@ export const playCard = (card, slotId, state) => {
           case _(["LINE", "STORE", "ALLY", "WORTH"]):
           case _(["LINE", "STORE", "NEUTRAL", "WORTH"]):
             // console.warn('save to our store');
-            return playOnTable(table);
+            return table[to].card
+              ? state
+              : playOnTable(table);
+              ;
+
+          case _(["LINE", "ACTIVE", "ALLY", "ENGAGE"]):
+          case _(["LINE", "ACTIVE", "ALLY", "GUARD"]):
+            // console.warn('activate engage or guard');
+            return table[to].card
+              ? state
+              : playOnTable(table);
+              ;
 
           case _(["ACTIVE", "LINE", "ALLY", "SKILL"]):
           case _(["ACTIVE", "ACTIVE", "ALLY", "SKILL"]):
@@ -264,7 +291,10 @@ export const reducer = (state, action) => {
     };
     case "DRAG_START": return { ...state, fly: action.payload };
     case "DRAG_END": return { ...state, fly: { ...state.fly, to: action.payload } };
-    case "GO_ON": return { ...state, phases: action.payload };
+    case "GO_ON": return action.payload !== "BEGIN"
+      ? { ...state, phases: action.payload }
+      : { ...setup }
+      ;
     case "WHAT_IS_NEXT": return checkTheFinalCondition(state);
     default: return state;
   }
