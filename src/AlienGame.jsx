@@ -183,8 +183,8 @@ export const AlienGame = () => {
           </section>
         </section>
 
-        <pre className="pointer-events-none select-none hidden">
-          <p className="text-green-700 py-4">At this point content is a mass of chaos</p>
+        <pre className="pointer-events-none select-none">
+          <p className="text-green-700 py-4">Near to a first working gameplay, just I documenting a lot.</p>
           {JSON.stringify({ ...state, deck: state.deck.length }, null, 2)}
         </pre>
 

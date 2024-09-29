@@ -16,7 +16,26 @@ _powered by jsdoc-duck_
 
 `"We ended the war on Earth by starting a war in the stars."`
 
-![ufo theory](public/ufo-theory.png)
+![Image description](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/3it31rbqn329b4m6ufk9.png)
+
+## Key Code:
+_duck working according this developer declared type contain all actions with their types_
+```js
+/**
+ * @typedef { |
+ * { type: "CREATE_DECK", payload: Card[] } |
+ * { type: "SHUFFLE_DECK" } |
+ * { type: "RELEASE_CARD", payload: SlotId } |
+ * { type: "DRAG_START", payload: {from:SlotId, card:Card} } |
+ * { type: "MOVE_CARD", payload: Card } |
+ * { type: "DRAG_END", payload: SlotId } |
+ * { type: "PLAY_CARD", payload: {actor:Card, slotId:SlotId } } |
+ * { type: "GO_ON", payload: Phases } |
+ * { type: "WHAT_IS_NEXT" }
+
+ * } Actions
+ */
+```
 
 ## Demo
 <!-- You can directly embed your game and code into this post (see the FAQ section of the challenge page) or you can share links to your game and public repo. -->
@@ -24,7 +43,32 @@ _powered by jsdoc-duck_
 ## Journey
 <!-- Tell us about your process, what you learned, anything you are particularly proud of, what you hope to do next, etc. -->
 
+Under heavy development:
+
+![Image description](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/1lj8mzd2wsjymr72w125.png)
+
+... when the drag and drop are start working 
+
+
+![Image description](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/zn35m3zk4vkvib0zwrua.png)
+
+... deck building according [Crawl Card Deck List](https://steamcommunity.com/sharedfiles/filedetails/?id=1296228670) _plagium_
+
+![Image description](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/4zcu8fhsylk3wajy0gpa.png) 
+```jsx
+<pre>{JSON.stringify({
+  hostile: state.deck.filter(card => card.side === "DARK" && card.work === "HIT").map(card => card.power).sort(descend).join(),
+  fighter: state.deck.filter(card => card.side === "LIGHT" && card.work === "HIT").map(card => card.power).sort(descend).join(),
+  survivor: state.deck.filter(card => card.side === "LIGHT" && card.work === "PROTECT").map(card => card.power).sort(descend).join(),
+  medicine: state.deck.filter(card => card.side === "LIGHT" && card.work === "RAISE").map(card => card.power).sort(descend).join(),
+  assets: state.deck.filter(card => card.side === "LIGHT" && card.work === "WORTH").map(card => card.power).sort(descend).join(),
+  skill: state.deck.filter(card => card.side === "LIGHT" && card.work === "SKILL").map(card => card.name).join(),
+  debug: state.deck.filter(card => card.side !== "LIGHT" && card.side !== "DARK").map(card => card.id).join(),
+  }, null, 2)}</pre>
+```
+
 <!-- We encourage you to consider adding a license for your code. -->
+> *License:* Open Source 
 
 <!-- Team Submissions: Please pick one member to publish the submission and credit teammates by listing their DEV usernames directly in the body of the post. -->
 
@@ -32,25 +76,17 @@ _powered by jsdoc-duck_
 
 <!-- Thanks for participating!  -->
 
-
-
 ```
 [    ][    ][     ][         ] <- 4 possible card draw from deck
 [item][hero][alien][spaceship] <- hero have solution points 
 ```
 
-Hostile: problem
+## Burn Out vs. Survive
+Our Captain (represent you in the game) have a bunch of solution to facing with incoming problems. But you can also manage allys and collect the assets. Two possible outcome will happen: Captain run out of solution and that  is lead to Burn Out. But if no more problems, then Captain Survive and happy after all. Until the next mission...
+ 
 
-Game win if hero left some solution pont. Alien give advice against problem,
-
-Qualify the problem:
-  -technical
-  -phisical
-  -combat
-
-## Quick code the game mechanism
-
-A certain point I was write down core mechanism with random script 
+> _TLDR: Don't read this text._  
+A certain point I was write down core mechanism with random script, At that moment I was understand.
 ```
   [ possible drag-to interaction ]
 
@@ -108,50 +144,18 @@ A certain point I was write down core mechanism with random script
   if SCENE:empty and LINEs:empty and HERO.pow > 0
     then HAPPY_END
 ```
-_This script never exsisted and even not well defined_
 
-## Easier path
+## Live Without CSS file
 
 Instead CSS I using **Tailwind**, but for simplify it is directly linked to html as cdn:
 ```html
 <script src="https://cdn.tailwindcss.com"></script>
 ```
+> *Drawback:* Not for product ready warning:
 
+![Image description](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/rnii6m9lnucvxne6tx3b.png)
 
-## Controll Animation idea
+## Conclusion
+... some final thoughts ...
 
-How controll the complex state animation game flow interaction process by react.
-
-interaction : action :
-  calc phase1 result
-  animate phase1 result
-  action: set endof phase1 state
-
-```js
-// interaction generate a DRAG_TO action
-quak.DRAG_TO({card, slot})
-
-// make a Stream entry which are descript the upcomming animations
-quak.ANIM([
-  drop(slot.card),
-  reducePower(card),
-  reducePower(hero),
-  drop(card),
-  checkReleaseOrInteraction(),  
-])
-
-quak.PREPARE_ANIM, quak.ADD_ANIM, quak.PLAY_ANIM
-
-// later if have a stream and onPlay
-
-useEffect(() => {
-  if(stream.length && onPlay) 
-   play(stream)
-,[stream, onPlay]})
-```
-
-## Truble of creation
-
-Harder to download my dreams.ai images, maybe need to create a proper nodejs server for that or using some test library
-
-Different aspect ratio images can cause trouble.
+Happy Coding! Remember: _Something Above Us!_ quack . quack .. quack ....

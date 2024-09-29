@@ -27,6 +27,7 @@ import { images } from "./arts";
 
 /**
  * Keys of Slots or Spots I was mixing this a bit.
+ * TODO: L5, L6, A3, S2 :: Space-ship / Location dynamic table size feature
  * 
  *  @typedef { |
  *     'L1' | 'L2' | 'L3' | 'L4' | 'L5' | 'L6' | 
@@ -41,7 +42,6 @@ import { images } from "./arts";
  *  id: SlotId,
  *  slot: Slot,
  *  card: Card | null,
- *  isTarget: boolean,
  * }} TableSpot
 */
 
@@ -119,46 +119,46 @@ export const playCard = (card, slotId, state) => {
     const _ = move => move.join();
 
     /** @type {(tabke:Table, extra:Partial<State>) => Table} */
-    const paste = (table, extra) => {
+    const playOnTable = (table, extra = {}) => {
       const result = ({...table,
         [from]: { ...table[from], card: null },
         [to]: { ...table[to], card },
         ...extra
       });
-      console.log('paste :: ', result)
+      console.log('playOnTable :: ', result)
       return result;
   };
 
     /** @type {(move:Move) => Table} */
     const tableRule = (move) => {
-      console.log(JSON.stringify(move));
+      // console.log(JSON.stringify(move));
       const {table} = state;
       switch (move.join()) {
         case _(["LINE", "HERO", "STRANGE", "ENGAGE"]):
           console.warn('strange engage vs Hero');
 
-          return table;
+          return playOnTable(table); // beat my captain
 
         case _(["LINE", "ACTIVE", "STRANGE", "ENGAGE"]):
           console.warn('strange engage vs ally');
-          return table;
+          return playOnTable(table);
 
         case _(["ACTIVE", "LINE", "ALLY", "ENGAGE"]):
           console.warn('our fornt will fight for ...');
-          return table;
+          return playOnTable(table);
 
         case _(["STORE", "ACTIVE", "ALLY", "ENGAGE"]):
         case _(["STORE", "ACTIVE", "ALLY", "FIX"]):
         case _(["STORE", "ACTIVE", "ALLY", "GUARD"]):
         case _(["STORE", "ACTIVE", "ALLY", "SKILL"]):
           console.warn('something will activate');
-          return table;
+          return playOnTable(table);
 
         case _(["LINE", "ACTIVE", "NEUTRAL", "WORTH"]):
         case _(["LINE", "ACTIVE", "ALLY", "WORTH"]):
           if (!state.table[to].card) {
             console.warn('earn score');
-            paste(table, {score: state.score + card.power});
+            return playOnTable(table, {score: state.score + card.power});
           }
           return table;
 
@@ -170,8 +170,7 @@ export const playCard = (card, slotId, state) => {
         case _(["LINE", "STORE", "ALLY", "WORTH"]):
         case _(["LINE", "STORE", "NEUTRAL", "WORTH"]):
           console.warn('save to our store');
-          paste(table)
-          return table;
+          return playOnTable(table);
 
         case _(["ACTIVE", "LINE", "ALLY", "SKILL"]):
         case _(["ACTIVE", "ACTIVE", "ALLY", "SKILL"]):
@@ -179,7 +178,7 @@ export const playCard = (card, slotId, state) => {
         case _(["ACTIVE", "DROP", "ALLY", "SKILL"]):
         case _(["ACTIVE", "STORE", "ALLY", "SKILL"]):
           console.warn('use a skill:', card.name);
-          return table;
+          return playOnTable(table);
 
         default: return table;
       }
@@ -194,8 +193,8 @@ export const playCard = (card, slotId, state) => {
 
     return { ...state, table, fly: null };
 
-  } catch (error) {
-    console.error(error);
+  } catch (error) { console.error(error);
+ 
     return { ...state, fly: null };
   }
 };
@@ -230,7 +229,7 @@ export const reducer = (state, action) => {
       state.table.L2,
       state.table.L3,
       state.table.L4,
-    ].filter(spot => spot.card === null).length >= 3
+    ].filter(spot => spot.card).length <= 1
       ? { ...state, phases: "STORY_GOES_ON" }
       : state
       ;
@@ -244,14 +243,14 @@ export const setup = {
   lost: [],
   fly: null,
   table: {
-    L1: { id: "L1", card: null, slot: "LINE", isTarget: false },
-    L2: { id: "L2", card: null, slot: "LINE", isTarget: false },
-    L3: { id: "L3", card: null, slot: "LINE", isTarget: false },
-    L4: { id: "L4", card: null, slot: "LINE", isTarget: false },
-    HERO: { id: "HERO", card: null, slot: "HERO", isTarget: false },
-    A1: { id: "A1", card: null, slot: "ACTIVE", isTarget: false },
-    A2: { id: "A2", card: null, slot: "ACTIVE", isTarget: false },
-    S1: { id: "S1", card: null, slot: "STORE", isTarget: false },
+    L1: { id: "L1", card: null, slot: "LINE" },
+    L2: { id: "L2", card: null, slot: "LINE" },
+    L3: { id: "L3", card: null, slot: "LINE" },
+    L4: { id: "L4", card: null, slot: "LINE" },
+    HERO: { id: "HERO", card: null, slot: "HERO" },
+    A1: { id: "A1", card: null, slot: "ACTIVE" },
+    A2: { id: "A2", card: null, slot: "ACTIVE" },
+    S1: { id: "S1", card: null, slot: "STORE" },
   },
   phases: "BEGIN",
   score: 0,
