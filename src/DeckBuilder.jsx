@@ -1,5 +1,5 @@
 import { descend } from "./utils";
-import { Card } from "./AlienGame";
+import { Card } from "./AlienSolitare";
 
 /** @type {(props: { deck: import('./alienDuck').Card[] }) => JSX.Element} */
 export const DeckBuilder = ({deck}) => (

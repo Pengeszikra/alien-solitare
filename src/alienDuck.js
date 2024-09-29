@@ -116,85 +116,97 @@ export const playCard = (card, slotId, state) => {
     /** @typedef {[Slot, Slot, Side, Work]} Move */
 
     /** @type {(m:Move) => string} */
-    const _ = move => move.join();
-
-    /** @type {(tabke:Table, extra:Partial<State>) => Table} */
-    const playOnTable = (table, extra = {}) => {
-      const result = ({...table,
-        [from]: { ...table[from], card: null },
-        [to]: { ...table[to], card },
-        ...extra
-      });
-      console.log('playOnTable :: ', result)
+    const _ = move => {
+      const result = move.join()
+      console.log(result);
       return result;
-  };
+    };
 
-    /** @type {(move:Move) => Table} */
-    const tableRule = (move) => {
-      // console.log(JSON.stringify(move));
-      const {table} = state;
-      switch (move.join()) {
-        case _(["LINE", "HERO", "STRANGE", "ENGAGE"]):
-          console.warn('strange engage vs Hero');
-
-          return playOnTable(table); // beat my captain
-
-        case _(["LINE", "ACTIVE", "STRANGE", "ENGAGE"]):
-          console.warn('strange engage vs ally');
-          return playOnTable(table);
-
-        case _(["ACTIVE", "LINE", "ALLY", "ENGAGE"]):
-          console.warn('our fornt will fight for ...');
-          return playOnTable(table);
-
-        case _(["STORE", "ACTIVE", "ALLY", "ENGAGE"]):
-        case _(["STORE", "ACTIVE", "ALLY", "FIX"]):
-        case _(["STORE", "ACTIVE", "ALLY", "GUARD"]):
-        case _(["STORE", "ACTIVE", "ALLY", "SKILL"]):
-          console.warn('something will activate');
-          return playOnTable(table);
-
-        case _(["LINE", "ACTIVE", "NEUTRAL", "WORTH"]):
-        case _(["LINE", "ACTIVE", "ALLY", "WORTH"]):
-          if (!state.table[to].card) {
-            console.warn('earn score');
-            return playOnTable(table, {score: state.score + card.power});
-          }
-          return table;
-
-        case _(["LINE", "STORE", "ALLY", "FIX"]):
-        case _(["LINE", "STORE", "ALLY", "ENGAGE"]):
-        case _(["LINE", "STORE", "ALLY", "GUARD"]):
-        case _(["LINE", "STORE", "ALLY", "SKILL"]):
-        case _(["LINE", "STORE", "NEUTRAL", "SKILL"]):
-        case _(["LINE", "STORE", "ALLY", "WORTH"]):
-        case _(["LINE", "STORE", "NEUTRAL", "WORTH"]):
-          console.warn('save to our store');
-          return playOnTable(table);
-
-        case _(["ACTIVE", "LINE", "ALLY", "SKILL"]):
-        case _(["ACTIVE", "ACTIVE", "ALLY", "SKILL"]):
-        case _(["ACTIVE", "HERO", "ALLY", "SKILL"]):
-        case _(["ACTIVE", "DROP", "ALLY", "SKILL"]):
-        case _(["ACTIVE", "STORE", "ALLY", "SKILL"]):
-          console.warn('use a skill:', card.name);
-          return playOnTable(table);
-
-        default: return table;
+    /** @type {(tabke:Table, extra:Partial<State>) => State} */
+    const playOnTable = (table, extra = {}) => {
+      try {
+        const result = ({
+          ...state,
+          table: {
+            ...table,
+            [from]: { ...table[from], card: null },
+            [to]: { ...table[to], card },
+          },
+          ...extra,
+          fly: null,
+        });
+        console.log('playOnTable :: ', result)
+        return result;
+      } catch (error) {
+        console.error(error);
+        return state;
       }
     };
 
-    const table = tableRule([
+    /** @type {(move:Move) => State} */
+    const tableRule = (move) => {
+        console.log('move::', move)
+        const { table } = state;
+        switch (move.join()) {
+          case _(["LINE", "HERO", "STRANGE", "ENGAGE"]):
+            // console.warn('strange engage vs Hero');
+            return playOnTable(table); // beat my captain
+
+          case _(["LINE", "ACTIVE", "STRANGE", "ENGAGE"]):
+            // console.warn('strange engage vs ally');
+            return playOnTable(table);
+
+          case _(["ACTIVE", "LINE", "ALLY", "ENGAGE"]):
+            // console.warn('our fornt will fight for ...');
+            return playOnTable(table);
+
+          case _(["STORE", "ACTIVE", "ALLY", "ENGAGE"]):
+          case _(["STORE", "ACTIVE", "ALLY", "FIX"]):
+          case _(["STORE", "ACTIVE", "ALLY", "GUARD"]):
+          case _(["STORE", "ACTIVE", "ALLY", "SKILL"]):
+            // console.warn('something will activate');
+            return playOnTable(table);
+
+          case _(["LINE", "ACTIVE", "NEUTRAL", "WORTH"]):
+          case _(["LINE", "ACTIVE", "ALLY", "WORTH"]):
+            if (!state.table[to].card) {
+              // console.warn('earn score');
+              return playOnTable(table, { score: state.score + card.power });
+            }
+            return state;
+
+          case _(["LINE", "STORE", "ALLY", "FIX"]):
+          case _(["LINE", "STORE", "ALLY", "ENGAGE"]):
+          case _(["LINE", "STORE", "ALLY", "GUARD"]):
+          case _(["LINE", "STORE", "ALLY", "SKILL"]):
+          case _(["LINE", "STORE", "NEUTRAL", "SKILL"]):
+          case _(["LINE", "STORE", "ALLY", "WORTH"]):
+          case _(["LINE", "STORE", "NEUTRAL", "WORTH"]):
+            // console.warn('save to our store');
+            return playOnTable(table);
+
+          case _(["ACTIVE", "LINE", "ALLY", "SKILL"]):
+          case _(["ACTIVE", "ACTIVE", "ALLY", "SKILL"]):
+          case _(["ACTIVE", "HERO", "ALLY", "SKILL"]):
+          case _(["ACTIVE", "DROP", "ALLY", "SKILL"]):
+          case _(["ACTIVE", "STORE", "ALLY", "SKILL"]):
+            // console.warn('use a skill:', card.name);
+            return playOnTable(table);
+
+          default: return state;
+        }
+    };
+
+    return tableRule([
       state.table[from].slot,
       state.table[to].slot,
       card?.side,
       card?.work,
     ]);
 
-    return { ...state, table, fly: null };
+  } catch (error) {
+    console.error(error);
 
-  } catch (error) { console.error(error);
- 
     return { ...state, fly: null };
   }
 };
@@ -212,27 +224,48 @@ export const releaseCard = (slotId, state) => {
   return { ...state, table, deck };
 };
 
+/** @type {(state:State) => State} */
+export const checkTheFinalCondition = (state) => {
+  const upperLine = [
+    state.table.L1,
+    state.table.L2,
+    state.table.L3,
+    state.table.L4,
+  ];
+
+  const amountOfCard = upperLine.filter(spot => spot.card).length;
+
+  if (
+    state.table.HERO?.card?.type === "HERO" && 
+    state.table.HERO.card.power <= 0 ||
+    state.table.HERO.card.type !== "HERO"
+  ) {
+    return {...state, phases: "BURN_OUT"};
+  }
+
+  if (amountOfCard <= 1 && state.deck.length > 0 ) return { ...state, phases: "STORY_GOES_ON" };
+
+  if (amountOfCard <= 1 && state.deck.length === 0 ) return { ...state, phases: "SURVIVE" };
+
+  return state;
+};
+
 /** @type {import("jsdoc-duck").Reducer<State, Actions>} */
 export const reducer = (state, action) => {
-  console.log(action) // can live without redux devtool
+  console.log(action) // TODO: Yield :: we can live without redux devtool!
   switch (action.type) {
     case "CREATE_DECK": return { ...state, deck: action.payload.map((card) => ({ ...card, src: images[Math.random() * images.length | 0] })) };
     case "MOVE_CARD": return { ...state, fly: action.payload, table: isPlaybleCheck(action.payload, state.table) };
     case "PLAY_CARD": return playCard(action.payload.actor, action.payload.slotId, state);
     case "RELEASE_CARD": return releaseCard(action.payload, state);
-    case "SHUFFLE_DECK": return { ...state, deck: [...state.deck.sort(() => (Math.random() > .5 ? -1 : 1))] };
+    case "SHUFFLE_DECK": return {
+      ...state, deck: [...state.deck.sort(() => (Math.random() > .5 ? -1 : 1))]
+        .slice(0, 12) // TODO remove deck size limit
+    };
     case "DRAG_START": return { ...state, fly: action.payload };
     case "DRAG_END": return { ...state, fly: { ...state.fly, to: action.payload } };
     case "GO_ON": return { ...state, phases: action.payload };
-    case "WHAT_IS_NEXT": return [
-      state.table.L1,
-      state.table.L2,
-      state.table.L3,
-      state.table.L4,
-    ].filter(spot => spot.card).length <= 1
-      ? { ...state, phases: "STORY_GOES_ON" }
-      : state
-      ;
+    case "WHAT_IS_NEXT": return checkTheFinalCondition(state);
     default: return state;
   }
 };

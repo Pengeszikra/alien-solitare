@@ -5,7 +5,6 @@ import { cardCollection } from "./cardCollections";
 import { delay } from "./utils";
 import { DeckBuilder } from "./DeckBuilder";
 
-
 /** @type {(quack: import('./alienDuck').Quack) => void} */
 const moment = 300;
 const initialSaga = async (quack) => {
@@ -40,9 +39,10 @@ export const Target = ({ id }) => (
  * @param {import('./alienDuck').Card} props.card
  * @param {import('./alienDuck').Quack} props.quack?
  * @param {import('./alienDuck').SlotId} props.slotId?
+ * @param {import('./alienDuck').Phases} props.phases?
  * @returns {JSX.Element}
  */
-export const Card = ({ card, quack, slotId }) => {
+export const Card = ({ card, quack, slotId, phases }) => {
   const { power, name, type, maxPower, side, id, src, work } = card;
   const [isDrag, setDrag] = useState(false);
   return (
@@ -69,7 +69,7 @@ export const Card = ({ card, quack, slotId }) => {
       bg-no-repeat
       hover:text-orange-300
     `}
-      draggable={!!quack?.DRAG_START}
+      draggable={!!quack?.DRAG_START && phases == "SOLITARE"}
       onDragStart={() => {
         setDrag(true);
         // console.log(`start: ${id}`);
@@ -105,9 +105,10 @@ export const Card = ({ card, quack, slotId }) => {
  * @param {Object} props
  * @param {Partial<import('./alienDuck').TableSpot>} props.slot 
  * @param {import('./alienDuck').Quack} props.quack
+ * @param {import('./alienDuck').Phases} props.phases
  * @returns {JSX.Element}
  */
-export const Slot = ({ slot: { card, id }, quack }) => {
+export const Slot = ({ slot: { card, id }, quack, phases }) => {
   const [isOver, setOver] = useState(false);
   return (
     <pre className={`text-white ${isOver ? "opacity-50" : ""}`}
@@ -124,14 +125,23 @@ export const Slot = ({ slot: { card, id }, quack }) => {
       }}
     >
       {card
-        ? <Card card={card} quack={quack} slotId={id} />
+        ? <Card card={card} quack={quack} slotId={id} phases={phases} />
         : <Target id={id} />
       }
     </pre>
   );
 }
 
-export const AlienGame = () => {
+/** 
+ * ## Something above us!
+ * Something above us: aliens or worst. 
+ * For solving our mankind agression we are decide: stop the war on Earth, 
+ * and let's go outside and conquerer as many planet as possible - we hope to find at least one. 
+ * Each political group and great company agree to start exploring a different direction!
+ * 
+ * @type {() => JSX.Element} 
+ */
+export const AlienSolitare = () => {
   const [state, quack] = useDuck(reducer, setup, label);
 
   useEffect(() => {
@@ -171,7 +181,7 @@ export const AlienGame = () => {
               state.table.L2,
               state.table.L3,
               state.table.L4
-            ].map(slot => <Slot key={slot.id} slot={slot} quack={quack} />)}
+            ].map(slot => <Slot key={slot.id} slot={slot} quack={quack} phases={state.phases} />)}
           </section>
           <section className="grid gap-4 grid-cols-4">
             {[
@@ -179,11 +189,27 @@ export const AlienGame = () => {
               state.table.A1,
               state.table.A2,
               state.table.S1
-            ].map(slot => <Slot key={slot.id} slot={slot} quack={quack} />)}
+            ].map(slot => <Slot key={slot.id} slot={slot} quack={quack} phases={state.phases} />)}
           </section>
         </section>
 
-        <pre className="pointer-events-none select-none">
+        {state.phases === "BURN_OUT" && (
+          <article className="bg-red-800 rounded-2xl text-white text-3xl p-8 absolute z-10 top-36 left-8 w-[800px]">
+            Mission was failed, captain you are Burn Out! 
+            <img src="Z0eTLnOV.jpg" className="my-4"/>
+            <p className="text-sm">Use the reset please (Ctrl + R)</p>
+          </article>
+        )} 
+
+        {state.phases === "SURVIVE" && (
+          <article className="bg-green-800 rounded-2xl text-white text-3xl p-8 absolute z-10 top-36 left-8 w-[800px]">
+            Congratulation captain 4 Mission!
+            <img src="tFJJ4ggf.jpg" className="my-4"/>
+            <p className="text-sm">Use the reset please (Ctrl + R)</p>
+          </article>
+        )} 
+
+        <pre className="pointer-events-none select-none hidden">
           <p className="text-green-700 py-4">Near to a first working gameplay, just I documenting a lot.</p>
           {JSON.stringify({ ...state, deck: state.deck.length }, null, 2)}
         </pre>

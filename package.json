@@ -1,12 +1,24 @@
 {
   "name": "alien-solitare",
   "description": "crawl card clone alien thematic solitare game for dev.io Challenge, example of jsdoc-duck",
-  "keywords": ["jsdoc-duck", "react", "tailwind", "game", "ccg", "state", "handling", "ai generated images"],
+  "keywords": [
+    "jsdoc-duck",
+    "react",
+    "tailwind",
+    "game",
+    "ccg",
+    "state",
+    "handling",
+    "ai generated images"
+  ],
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "author": {
-    "name": "Peter Vivo"
+  "author": "Peter Vivo <pengeszikra@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Pengeszikra/alien-solitare"
   },
   "scripts": {
     "dev": "vite",

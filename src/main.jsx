@@ -1,9 +1,9 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { AlienGame } from './AlienGame';
+import { AlienSolitare } from './AlienSolitare';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <AlienGame />
+    <AlienSolitare />
   </StrictMode>,
 )
