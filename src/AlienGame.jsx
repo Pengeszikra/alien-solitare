@@ -159,8 +159,8 @@ export const AlienGame = () => {
     <main className="bg-black text-zinc-200 --bg-[url('ufo-theory.png')]">
       <article className="relative p-4">
         <pre className="pointer-events-none select-none">{`
-          A L I E N - S O L I T A R E
-          powered by: jsdoc-duck        future:${state.deck.length} past: 0 phases:${state.phases}
+      A L I E N - S O L I T A R E
+      powered by: jsdoc-duck       future: ${state.deck.length} past: 0 phases: ${state.phases} score: ${state.score}
           `}
         </pre>
 

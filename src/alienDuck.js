@@ -70,6 +70,7 @@ import { images } from "./arts";
  * fly: { from: SlotId, to?: SlotId, card: Card },
  * table: Table,
  * phases: Phases,
+ * score: number,
  * }} State
  */
 
@@ -110,34 +111,56 @@ export const playCard = (card, slotId, state) => {
     console.log(slotId, state.fly)
     const { from, to } = state.fly;
 
+    if (from === to) return {...state, fly: null};
+
     /** @typedef {[Slot, Slot, Side, Work]} Move */
 
     /** @type {(m:Move) => string} */
     const _ = move => move.join();
 
-    /** @type {(move:Move) => void} */
-    const caseHandling = (move) => {
+    /** @type {(tabke:Table, extra:Partial<State>) => Table} */
+    const paste = (table, extra) => {
+      const result = ({...table,
+        [from]: { ...table[from], card: null },
+        [to]: { ...table[to], card },
+        ...extra
+      });
+      console.log('paste :: ', result)
+      return result;
+  };
+
+    /** @type {(move:Move) => Table} */
+    const tableRule = (move) => {
       console.log(JSON.stringify(move));
+      const {table} = state;
       switch (move.join()) {
         case _(["LINE", "HERO", "STRANGE", "ENGAGE"]):
           console.warn('strange engage vs Hero');
-          return;
+
+          return table;
 
         case _(["LINE", "ACTIVE", "STRANGE", "ENGAGE"]):
           console.warn('strange engage vs ally');
-          return;
+          return table;
 
         case _(["ACTIVE", "LINE", "ALLY", "ENGAGE"]):
           console.warn('our fornt will fight for ...');
-          return;
+          return table;
 
         case _(["STORE", "ACTIVE", "ALLY", "ENGAGE"]):
         case _(["STORE", "ACTIVE", "ALLY", "FIX"]):
         case _(["STORE", "ACTIVE", "ALLY", "GUARD"]):
         case _(["STORE", "ACTIVE", "ALLY", "SKILL"]):
-        case _(["STORE", "ACTIVE", "ALLY", "WORTH"]):
           console.warn('something will activate');
-          return;
+          return table;
+
+        case _(["LINE", "ACTIVE", "NEUTRAL", "WORTH"]):
+        case _(["LINE", "ACTIVE", "ALLY", "WORTH"]):
+          if (!state.table[to].card) {
+            console.warn('earn score');
+            paste(table, {score: state.score + card.power});
+          }
+          return table;
 
         case _(["LINE", "STORE", "ALLY", "FIX"]):
         case _(["LINE", "STORE", "ALLY", "ENGAGE"]):
@@ -147,7 +170,8 @@ export const playCard = (card, slotId, state) => {
         case _(["LINE", "STORE", "ALLY", "WORTH"]):
         case _(["LINE", "STORE", "NEUTRAL", "WORTH"]):
           console.warn('save to our store');
-          return;
+          paste(table)
+          return table;
 
         case _(["ACTIVE", "LINE", "ALLY", "SKILL"]):
         case _(["ACTIVE", "ACTIVE", "ALLY", "SKILL"]):
@@ -155,29 +179,21 @@ export const playCard = (card, slotId, state) => {
         case _(["ACTIVE", "DROP", "ALLY", "SKILL"]):
         case _(["ACTIVE", "STORE", "ALLY", "SKILL"]):
           console.warn('use a skill:', card.name);
-          return;
+          return table;
 
-        default: return state;
+        default: return table;
       }
     };
 
-    caseHandling([
+    const table = tableRule([
       state.table[from].slot,
       state.table[to].slot,
       card?.side,
       card?.work,
     ]);
 
-  // if everything is oke this code are put card to a new place
-    const table = (from === to || state.table[to].card)
-      ? state.table
-      : {
-        ...state.table,
-        [from]: { ...state.table[from], card: null },
-        [to]: { ...state.table[to], card }
-      }
-      ;
     return { ...state, table, fly: null };
+
   } catch (error) {
     console.error(error);
     return { ...state, fly: null };
@@ -238,4 +254,5 @@ export const setup = {
     S1: { id: "S1", card: null, slot: "STORE", isTarget: false },
   },
   phases: "BEGIN",
+  score: 0,
 }
