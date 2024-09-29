@@ -8,12 +8,13 @@ _powered by jsdoc-duck_
 
 **Plagiarism:** Saddly my time is very limited, so a first moment I write down the base concept to my phone meanwhile of passenger of country drive ( 2hr ) in temux and vim. My plane was 2 or 3 day development time is need to be enough, but I am not the fastes developer. That why I choose this game method which is very lovely, mid complex, used by: [Card Crawl - base idea](https://play.google.com/store/apps/details?id=com.tinytouchtales.cardcrawl&hl=en_US), reworked that game mechanism to Alien theme.
 
-Instead CSS I using **Tailwind**, but for simplify it is directly linked to html as cdn:
-```html
-<script src="https://cdn.tailwindcss.com"></script>
-```
-
 **Art:** A previous year I spended to create many (60K+) AI generated images with (dream.ai, clipDrop, ChatGPT) , so I have enough Sci-Fi related which is handy for this game.
+
+## Something above us!
+
+> Aliens or worst. For solving our mankind agression we are decide: stop the war on Earth, and let's go outside and conquerer as many planet as possible - we hope to find at least one. Each political group and great company agree to start exploring a different direction!
+
+`"We ended the war on Earth by starting a war in the stars."`
 
 ![ufo theory](public/ufo-theory.png)
 
@@ -46,6 +47,8 @@ Qualify the problem:
   -technical
   -phisical
   -combat
+
+## Quick code the game mechanism
 
 A certain point I was write down core mechanism with random script 
 ```
@@ -105,6 +108,17 @@ A certain point I was write down core mechanism with random script
   if SCENE:empty and LINEs:empty and HERO.pow > 0
     then HAPPY_END
 ```
+_This script never exsisted and even not well defined_
+
+## Easier path
+
+Instead CSS I using **Tailwind**, but for simplify it is directly linked to html as cdn:
+```html
+<script src="https://cdn.tailwindcss.com"></script>
+```
+
+
+## Controll Animation idea
 
 How controll the complex state animation game flow interaction process by react.
 

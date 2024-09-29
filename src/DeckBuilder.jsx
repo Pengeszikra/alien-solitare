@@ -9,7 +9,7 @@ export const DeckBuilder = ({deck}) => (
       hostile: deck.filter(card => card.side === "DARK" && card.work === "HIT").map(card => card.power).sort(descend).join(),
       fighter: deck.filter(card => card.side === "LIGHT" && card.work === "HIT").map(card => card.power).sort(descend).join(),
       survivor: deck.filter(card => card.side === "LIGHT" && card.work === "PROTECT").map(card => card.power).sort(descend).join(),
-      medicine: deck.filter(card => card.side === "LIGHT" && card.work === "RAISE").map(card => card.power).sort(descend).join(),
+      medicine: deck.filter(card => card.side === "LIGHT" && card.work === "FIX").map(card => card.power).sort(descend).join(),
       assets: deck.filter(card => ["NEUTRAL", "LIGHT"].includes(card.side) && card.work === "WORTH").map(card => card.power).sort(descend).join(),
       skill: deck.filter(card => card.side === "LIGHT" && card.work === "SKILL").map(card => card.name).join(),
       debug: deck.filter(card => !["DARK", "NEUTRAL", "LIGHT"].includes(card.side)).map(card => card.id).join(),

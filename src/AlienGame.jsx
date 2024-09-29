@@ -84,9 +84,17 @@ export const Card = ({ card, quack, slotId }) => {
         ? <p className="pointer-events-none">{power} \ {maxPower}</p>
         : <p className="pointer-events-none absolute right-4">{power}</p>
       }
-      {type !== "HERO" && <p className={`pointer-events-none ${side === "DARK" ? "text-zinc-600" : side === "NEUTRAL" ? "text-sky-600" : ""}`}>{side}</p>}
+      {type !== "HERO" && <p className={`
+        pointer-events-none 
+        ${side === "STRANGE" ? "text-zinc-600" : side === "NEUTRAL" ? "text-sky-600" : ""}
+      `}>{side}</p>}
       <p className="pointer-events-none max-w-[180px] text-wrap">{name}</p>
-      <p className="pointer-events-none text-green-500 text-sm">{work}</p>
+      <p className={`
+        pointer-events-none
+        text-green-500
+        text-sm
+        ${side === "STRANGE" ? "text-rose-400" : ""}
+      `}>{work}</p>
     </section>
   );
 }
@@ -141,7 +149,7 @@ export const AlienGame = () => {
   }, [state.phases, quack]);
 
   useEffect(() => {
-    console.log('check story goes on', state.fly, state.phases)
+    // console.log('check story goes on', state.fly, state.phases)
     if (state.fly === null && state.phases === "SOLITARE") {
       quack.WHAT_IS_NEXT();
     }

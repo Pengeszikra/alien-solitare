@@ -1,22 +1,33 @@
 import { images } from "./arts";
 
 /**
+ * Dictionary
+ * 
+ * @typedef {'HERO' | 'ALIEN' | 'SPACE-SHIP' | 'LOCATION' | 'GADGET' | 'STORY'} Kind
+ * @typedef {'GUARD' | 'ENGAGE' | 'FIX' | 'SKILL' | 'WORTH'} Work
+ * @typedef {'ALLY' | 'STRANGE' | 'NEUTRAL'} Side
+ * @typedef {'LINE' | 'HERO' | 'ACTIVE' | 'STORE' | 'DROP'} Slot
+ */
+
+/** 
  * @typedef {{
  *   id: string,
  *   name: string,
  *   power: number,
- *   maxPower: number,x
+ *   maxPower: number,
  *   actionSlot: number,
  *   storeSlot: number,
- *   type: 'HERO' | 'ALIEN' | 'SPACE-SHIP' | 'LOCATION' | 'GADGET' | 'STORY' | 'LOOT',
- *   work: 'PROTECT' | 'HIT' | 'RAISE' | 'SKILL' | 'WORTH' | '',
- *   side: 'DARK' | 'LIGHT' | 'NEUTRAL'
+ *   type: Kind,
+ *   work: Work,
+ *   side: Side,
  *   src: string;
  *   rule: string;
  * }} Card
  */
 
 /**
+ * Keys of Slots or Spots I was mixing this a bit.
+ * 
  *  @typedef { |
  *     'L1' | 'L2' | 'L3' | 'L4' | 'L5' | 'L6' | 
  *   'HERO' | 'A1' | 'A2' | 'A3' | 'S1' | 'S2'
@@ -24,9 +35,11 @@ import { images } from "./arts";
  */
 
 /**
+ * This is represent the whole game are
+ * 
  * @typedef {{
  *  id: SlotId,
- *  slot: 'LINE' | 'HERO' | 'ACTIVE' | 'STORE',
+ *  slot: Slot,
  *  card: Card | null,
  *  isTarget: boolean,
  * }} TableSpot
@@ -62,17 +75,15 @@ import { images } from "./arts";
 
 /**
  * @typedef { |
- * { type: "MOVE_CARD", payload: Card } |
- * { type: "DEAL_CARD", payload: Card } |
- * { type: "DRAG_START", payload: {from:SlotId, card:Card} } |
- * { type: "DRAG_END", payload: SlotId } |
- * { type: "PLAY_CARD", payload: {actor:Card, slotId:SlotId } } |
- * { type: "RELEASE_CARD", payload: SlotId } |
  * { type: "CREATE_DECK", payload: Card[] } |
  * { type: "SHUFFLE_DECK" } |
+ * { type: "RELEASE_CARD", payload: SlotId } |
+ * { type: "DRAG_START", payload: {from:SlotId, card:Card} } |
+ * { type: "MOVE_CARD", payload: Card } |
+ * { type: "DRAG_END", payload: SlotId } |
+ * { type: "PLAY_CARD", payload: {actor:Card, slotId:SlotId } } |
  * { type: "GO_ON", payload: Phases } |
- * { type: "WHAT_IS_NEXT" } |
- * { type: "DRAW_CARD" }
+ * { type: "WHAT_IS_NEXT" }
  * } Actions
  */
 
@@ -85,10 +96,8 @@ export const label = {
   MOVE_CARD: "MOVE_CARD",
   CREATE_DECK: "CREATE_DECK",
   SHUFFLE_DECK: "SHUFFLE_DECK",
-  DRAW_CARD: "DRAW_CARD",
   PLAY_CARD: "PLAY_CARD",
   RELEASE_CARD: "RELEASE_CARD",
-  DEAL_CARD: "DEAL_CARD",
   DRAG_START: "DRAG_START",
   DRAG_END: "DRAG_END",
   GO_ON: "GO_ON",
@@ -96,24 +105,82 @@ export const label = {
 };
 
 /** @type {(card:Card, slotId: string, state: State) => State} */
-export const deployCard = (card, slotId, state) => {
-  console.log(slotId, state.fly)
-  const {from, to, actor} = state.fly;
+export const playCard = (card, slotId, state) => {
+  try {
+    console.log(slotId, state.fly)
+    const { from, to } = state.fly;
+
+    /** @typedef {[Slot, Slot, Side, Work]} Move */
+
+    /** @type {(m:Move) => string} */
+    const _ = move => move.join();
+
+    /** @type {(move:Move) => void} */
+    const caseHandling = (move) => {
+      console.log(JSON.stringify(move));
+      switch (move.join()) {
+        case _(["LINE", "HERO", "STRANGE", "ENGAGE"]):
+          console.warn('strange engage vs Hero');
+          return;
+
+        case _(["LINE", "ACTIVE", "STRANGE", "ENGAGE"]):
+          console.warn('strange engage vs ally');
+          return;
+
+        case _(["ACTIVE", "LINE", "ALLY", "ENGAGE"]):
+          console.warn('our fornt will fight for ...');
+          return;
+
+        case _(["STORE", "ACTIVE", "ALLY", "ENGAGE"]):
+        case _(["STORE", "ACTIVE", "ALLY", "FIX"]):
+        case _(["STORE", "ACTIVE", "ALLY", "GUARD"]):
+        case _(["STORE", "ACTIVE", "ALLY", "SKILL"]):
+        case _(["STORE", "ACTIVE", "ALLY", "WORTH"]):
+          console.warn('something will activate');
+          return;
+
+        case _(["LINE", "STORE", "ALLY", "FIX"]):
+        case _(["LINE", "STORE", "ALLY", "ENGAGE"]):
+        case _(["LINE", "STORE", "ALLY", "GUARD"]):
+        case _(["LINE", "STORE", "ALLY", "SKILL"]):
+        case _(["LINE", "STORE", "NEUTRAL", "SKILL"]):
+        case _(["LINE", "STORE", "ALLY", "WORTH"]):
+        case _(["LINE", "STORE", "NEUTRAL", "WORTH"]):
+          console.warn('save to our store');
+          return;
+
+        case _(["ACTIVE", "LINE", "ALLY", "SKILL"]):
+        case _(["ACTIVE", "ACTIVE", "ALLY", "SKILL"]):
+        case _(["ACTIVE", "HERO", "ALLY", "SKILL"]):
+        case _(["ACTIVE", "DROP", "ALLY", "SKILL"]):
+        case _(["ACTIVE", "STORE", "ALLY", "SKILL"]):
+          console.warn('use a skill:', card.name);
+          return;
+
+        default: return state;
+      }
+    };
+
+    caseHandling([
+      state.table[from].slot,
+      state.table[to].slot,
+      card?.side,
+      card?.work,
+    ]);
 
   // if everything is oke this code are put card to a new place
-  try {
     const table = (from === to || state.table[to].card)
       ? state.table
       : {
-          ...state.table,
-          [from]: {...state.table[from], card: null},
-          [to]: {...state.table[to], card: actor}
-        }
+        ...state.table,
+        [from]: { ...state.table[from], card: null },
+        [to]: { ...state.table[to], card }
+      }
       ;
-    return {...state, table, fly: null};
+    return { ...state, table, fly: null };
   } catch (error) {
     console.error(error);
-    return {...state, fly:null};
+    return { ...state, fly: null };
   }
 };
 
@@ -126,29 +193,29 @@ export const isPlaybleCheck = (card, table) => {
 export const releaseCard = (slotId, state) => {
   if (state.table?.[slotId]?.card) return state;
   const [card, ...deck] = state.deck;
-  const table = {...state.table, [slotId]: {...state.table[slotId], card}};
-  return {...state, table, deck};
+  const table = { ...state.table, [slotId]: { ...state.table[slotId], card } };
+  return { ...state, table, deck };
 };
 
 /** @type {import("jsdoc-duck").Reducer<State, Actions>} */
 export const reducer = (state, action) => {
-  // console.log(action)
-  switch(action.type) {
-    case "CREATE_DECK": return {...state, deck: action.payload.map((card) => ({...card, src:images[Math.random() * images.length | 0]})) };
-    case "MOVE_CARD": return {...state, fly: action.payload, table: isPlaybleCheck(action.payload, state.table) };
-    case "PLAY_CARD": return deployCard(action.payload.actor, action.payload.slotId, state);
+  console.log(action) // can live without redux devtool
+  switch (action.type) {
+    case "CREATE_DECK": return { ...state, deck: action.payload.map((card) => ({ ...card, src: images[Math.random() * images.length | 0] })) };
+    case "MOVE_CARD": return { ...state, fly: action.payload, table: isPlaybleCheck(action.payload, state.table) };
+    case "PLAY_CARD": return playCard(action.payload.actor, action.payload.slotId, state);
     case "RELEASE_CARD": return releaseCard(action.payload, state);
-    case "SHUFFLE_DECK": return {...state, deck: [...state.deck.sort(() => (Math.random() > .5 ? -1 : 1))]};
-    case "DRAG_START": return {...state, fly: action.payload };
-    case "DRAG_END": return {...state, fly: {...state.fly, to:action.payload}};
-    case "GO_ON": return {...state, phases: action.payload};
+    case "SHUFFLE_DECK": return { ...state, deck: [...state.deck.sort(() => (Math.random() > .5 ? -1 : 1))] };
+    case "DRAG_START": return { ...state, fly: action.payload };
+    case "DRAG_END": return { ...state, fly: { ...state.fly, to: action.payload } };
+    case "GO_ON": return { ...state, phases: action.payload };
     case "WHAT_IS_NEXT": return [
       state.table.L1,
       state.table.L2,
       state.table.L3,
       state.table.L4,
     ].filter(spot => spot.card === null).length >= 3
-      ? {...state, phases: "STORY_GOES_ON"}
+      ? { ...state, phases: "STORY_GOES_ON" }
       : state
       ;
     default: return state;
