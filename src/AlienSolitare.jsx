@@ -6,6 +6,8 @@ import { delay } from "./utils";
 import { DeckBuilder } from "./DeckBuilder";
 import { GalleryDecider } from "./GalleryDecider";
 import { images } from "./arts";
+import { HowToPlay } from "./HowToPlay";
+
 
 /** @type {(quack: import('./alienDuck').Quack) => void} */
 const moment = 300;
@@ -33,7 +35,7 @@ const storyGoesOnSaga = async (quack) => {
 };
 
 export const Target = ({ id, type }) => (
-  <section data-zone={id} className="w-[200px] h-[300px] rounded-2xl border border-4 p-4 border-zinc-700 border-dashed">
+  <section data-zone={id} className="w-1/5 aspect-[3/4] h-full w-full rounded-2xl border border-4 p-4 border-zinc-700 border-dashed">
     <p className="text-zinc-500">{type}</p>
   </section>
 )
@@ -54,8 +56,9 @@ export const Card = ({ card, quack, slotId, phases }) => {
       data-zone={id}
       className={`
       relative
-      w-[200px]
-      h-[300px]
+      w-1/5
+      aspect-[3/5]
+      h-full w-full
       rounded-2xl
       border
       border-4
@@ -176,7 +179,7 @@ export const AlienSolitare = () => {
           `}
         </pre>
 
-        <section className="grid gap-4 grid-cols-1 place-items-start">
+        <section className="grid gap-4 grid-cols-1 place-items-start w-full">
           <section className="grid gap-4 grid-cols-5">
             {[
               state.table.L1,
@@ -185,13 +188,11 @@ export const AlienSolitare = () => {
               state.table.L4,
               state.table.DROP
             ].map(slot => <Slot key={slot.id} slot={slot} quack={quack} phases={state.phases} />)}
-          </section>
-          <section className="grid gap-4 grid-cols-4">
             {[
               state.table.HERO,
               state.table.A1,
               state.table.A2,
-              state.table.S1
+              state.table.S1,
             ].map(slot => <Slot key={slot.id} slot={slot} quack={quack} phases={state.phases} />)}
           </section>
         </section>
@@ -225,10 +226,9 @@ export const AlienSolitare = () => {
           ].map((card, index) => ({ ...card, src: images[index] }))} />
         )}
 
-        <article className="my-8">
-          <h1 className="text-3xl" >How to play</h1>
-          <p>this section can fill by AI ... will coming </p>
-        </article>
+        <section className="my-8">
+          <HowToPlay />
+        </section>
 
       </article>
     </main>
