@@ -226,7 +226,7 @@ export const AlienSolitare = () => {
           ].map((card, index) => ({ ...card, src: images[index] }))} />
         )}
 
-        <section className="my-8">
+        <section className="my-8 w-4/5">
           <HowToPlay />
         </section>
 
