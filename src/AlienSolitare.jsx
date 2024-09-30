@@ -36,12 +36,12 @@ const storyGoesOnSaga = async (quack) => {
 const cardWidth = "11rem";
 
 export const Target = ({ id, type }) => (
-  <section 
-    data-zone={id} 
+  <section
+    data-zone={id}
     className={`
       relative
       w-[${cardWidth}]
-      aspect-[3/5]
+      aspect-[4/6]
       rounded-2xl
       border
       lg:border-4
@@ -71,7 +71,7 @@ export const Card = ({ card, quack, slotId, phases }) => {
       className={`
       relative
       w-[${cardWidth}]
-      aspect-[3/5]
+      aspect-[4/6]
       object-cover
       rounded-2xl
       border
@@ -86,7 +86,7 @@ export const Card = ({ card, quack, slotId, phases }) => {
       ${isDrag ? "border-dashed" : ""}
       overflow-hidden
       bg-[linear-gradient(rgba(0,0,0,1),rgba(0,0,0,0)),url('${src}')]
-      bg-bottom
+      bg-center
       bg-cover
       bg-no-repeat
       hover:text-orange-300
@@ -217,12 +217,24 @@ export const AlienSolitare = () => {
           <article onClick={() => quack.GO_ON("BEGIN")} className="bg-red-800 rounded-2xl text-white text-3xl p-8 absolute z-10 top-36 left-8 w-[800px] select-none">
             Mission was failed, captain you are Burn Out!
             <img src="Z0eTLnOV.jpg" className="my-4" />
+
             <p className="text-sm">Use the reset please (Ctrl + R) ... just a joke.</p>
           </article>
         )}
 
         {state.phases === "SURVIVE" && (
-          <article onClick={() => quack.GO_ON("BEGIN")} className="bg-green-800 rounded-2xl text-white text-3xl p-8 absolute z-10 top-36 left-8 w-[800px] select-none">
+            <div className="absolute z-20 fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50 transition-all duration-500 ease-in-out opacity-0 translate-y-4 modal-show">
+              <div className="bg-white rounded-lg p-8 shadow-lg">
+                <h2 className="text-xl font-bold mb-4">Modal Title</h2>
+                <p>This is a simple modal!</p>
+              </div>
+            </div>
+        )}
+
+        {state.phases === "SURVIVE" && (
+          <article onClick={() => quack.GO_ON("BEGIN")} className={`
+            bg-green-800 rounded-2xl text-white text-3xl p-8 absolute z-10 top-36 left-8 w-[800px] select-none
+          `}>
             Congratulation captain 4 Mission!
             <img src="tFJJ4ggf.jpg" className="my-4" />
             <p className="text-sm">Use the reset please (Ctrl + R)</p>
@@ -244,13 +256,13 @@ export const AlienSolitare = () => {
           ].map((card, index) => ({ ...card, src: images[index] }))} />
         )}
 
-          <article className="bg-zinc-900 rounded-xl my-4 flex gap-2 items-center px-4 w-[56rem]">
-              <button 
-                className="p2 w-[3rem] h-[3rem] my-4 text-2xl rounded-[50%] bg-orange-900 text-black block"
-                onClick={() => quack.HELP_SWITCH()}
-                >?</button>
-               <p className="text-sm text-zinc-500">summary: drag and drop cards, to a prefect place, if top line left 1 card automatic refill. <br/>Survie: empty deck and line.</p>
-            </article>
+        <article className="bg-zinc-900 rounded-xl my-4 flex gap-2 items-center px-4 w-[56rem]">
+          <button
+            className="p2 w-[3rem] h-[3rem] my-4 text-2xl rounded-[50%] bg-orange-900 text-black block"
+            onClick={() => quack.HELP_SWITCH()}
+          >?</button>
+          <p className="text-sm text-zinc-500">summary: drag and drop cards, to a prefect place, if top line left 1 card automatic refill. <br />Survie: empty deck and line.</p>
+        </article>
 
         {state.help && <section className="w-[56rem]">
           <HowToPlay />

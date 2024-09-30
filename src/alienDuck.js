@@ -27,7 +27,7 @@
  * Keys of Slots or Spots I was mixing this a bit.
  * TODO: L5, L6, A3, S2 :: Space-ship / Location dynamic table size feature
  * 
- *  @typedef { 'DROP' |
+ *  @typedef { 'DROP' | 
  *     'L1' | 'L2' | 'L3' | 'L4' | 'L5' | 'L6' | 
  *   'HERO' | 'A1' | 'A2' | 'A3' | 'S1' | 'S2'
  * } SlotId
@@ -198,7 +198,9 @@ export const playCard = (card, slotId, state) => {
             table: {
               ...table,
               [from]: { ...table[from], card: null },
-              [to]: { ...table[to], card: owerhit ? null : guard },
+              [to]: guard.power <= 0 
+                ? { ...table[to], card: null  }
+                : { ...table[to] },
               HERO: { ...table.HERO, card: captain }
             },
             fly: null,
@@ -319,7 +321,6 @@ export const playCard = (card, slotId, state) => {
                 : table[to]
             }, { lost: [...state.lost, card] });
 
-
         // case _(["ACTIVE", "ACTIVE", "ALLY", "SKILL"]):
         // case _(["ACTIVE", "HERO", "ALLY", "SKILL"]):
         // case _(["ACTIVE", "DROP", "ALLY", "SKILL"]):
@@ -387,7 +388,7 @@ export const checkTheFinalCondition = (state) => {
 export const reducer = (state, action) => {
   console.log(action) // TODO: Yield :: we can live without redux devtool!
   switch (action.type) {
-    case "CREATE_DECK": return { ...state, deck: action.payload.map(card => ({...card, power:card.maxPower})) };
+    case "CREATE_DECK": return { ...state, deck: action.payload.filter(c => c.work !== "SKILL").map(card => ({...card, power:card.maxPower})) };
     // case "CREATE_DECK": return { ...state, deck: action.payload.map((card) => ({ ...card, src: images[Math.random() * images.length | 0] })) };
     case "MOVE_CARD": return { ...state, fly: action.payload, table: isPlaybleCheck(action.payload, state.table) };
     case "PLAY_CARD": return playCard(action.payload.actor, action.payload.slotId, state);
