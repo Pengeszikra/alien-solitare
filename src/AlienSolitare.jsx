@@ -96,11 +96,14 @@ export const Card = ({ card, quack, slotId, phases }) => {
         ${side === "STRANGE" ? "text-zinc-600" : side === "NEUTRAL" ? "text-sky-600" : ""}
       `}>{side}</p>}
       <p className="pointer-events-none max-w-[180px] text-wrap">{name}</p>
-      <p className={`
-        pointer-events-none
-        text-green-500
-        ${side === "STRANGE" ? "text-rose-400" : ""}
-      `}>{work}</p>
+      <section className="flex gap-2">
+        <p className={`
+          pointer-events-none
+          text-green-500
+          ${side === "STRANGE" ? "text-rose-400" : ""}
+        `}>{work}</p>
+        <p className="text-[.6rem]">{type}</p>
+      </section>
     </section>
   );
 }
@@ -199,7 +202,7 @@ export const AlienSolitare = () => {
           <article onClick={() => quack.GO_ON("BEGIN")} className="bg-red-800 rounded-2xl text-white text-3xl p-8 absolute z-10 top-36 left-8 w-[800px] select-none">
             Mission was failed, captain you are Burn Out!
             <img src="Z0eTLnOV.jpg" className="my-4" />
-            <p className="text-sm">Use the reset please (Ctrl + R)</p>
+            <p className="text-sm">Use the reset please (Ctrl + R) ... just a joke.</p>
           </article>
         )}
 
@@ -221,6 +224,8 @@ export const AlienSolitare = () => {
         {false && (
           <GalleryDecider deck={[
             ...cardCollection,
+            ...cardCollection,
+            ...cardCollection,
           ].map((card, index) => ({ ...card, src: images[index] }))} />
         )}
 
@@ -231,7 +236,7 @@ export const AlienSolitare = () => {
                 >?</button>
                <p className="text-sm text-zinc-500">summary: drag and drop cards, to a prefect place, if top line left 1 card automatic refill. <br/>Survie: empty deck and line.</p>
             </article>
-
+¬
         {state.help && <section className="w-[42rem]">
           <HowToPlay />
         </section>}

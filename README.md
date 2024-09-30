@@ -141,3 +141,10 @@ So this game are very early POC state at right moment, but it is `open source` (
 ![Image description](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/l1ojlmem4bwsx9e51ywb.png)
 
 Happy Coding! Remember: _Something Above Us!_ quack . quack .. quack ....
+
+## Additional
+
+```html
+<script>window.onbeforeunload = () => ""</script>
+```
+

@@ -386,12 +386,13 @@ export const checkTheFinalCondition = (state) => {
 export const reducer = (state, action) => {
   console.log(action) // TODO: Yield :: we can live without redux devtool!
   switch (action.type) {
-    case "CREATE_DECK": return { ...state, deck: action.payload.map((card) => ({ ...card, src: images[Math.random() * images.length | 0] })) };
+    case "CREATE_DECK": return { ...state, deck: action.payload.map(card => ({...card, power:card.maxPower})) };
+    // case "CREATE_DECK": return { ...state, deck: action.payload.map((card) => ({ ...card, src: images[Math.random() * images.length | 0] })) };
     case "MOVE_CARD": return { ...state, fly: action.payload, table: isPlaybleCheck(action.payload, state.table) };
     case "PLAY_CARD": return playCard(action.payload.actor, action.payload.slotId, state);
     case "RELEASE_CARD": return releaseCard(action.payload, state);
     case "SHUFFLE_DECK": return {
-      ...state, deck: [...state.deck.sort(() => (Math.random() > .5 ? -1 : 1))]
+      ...state, deck: [...state.deck].sort(() => (Math.random() > .5 ? -1 : 1))
         // .slice(0, 22) // TODO remove deck size limit
     };
     case "DRAG_START": return { ...state, fly: action.payload };
