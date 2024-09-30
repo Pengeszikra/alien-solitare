@@ -173,7 +173,7 @@ export const AlienSolitare = () => {
       <article className="relative p-4">
         <pre className="pointer-events-none select-none">{`
       A L I E N - S O L I T A R E
-      powered by: jsdoc-duck       future: ${state.deck.length} past: ${state.lost.length} phases: ${state.phases} score: ${state.score}
+      powered by: jsdoc-duck       deck: ${state.deck.length} drop: ${state.lost.length} phases: ${state.phases} score: ${state.score}
           `}
         </pre>
 
@@ -224,10 +224,13 @@ export const AlienSolitare = () => {
           ].map((card, index) => ({ ...card, src: images[index] }))} />
         )}
 
-        <button 
-          className="p2 w-[3rem] h-[3rem] my-4 text-2xl rounded-[50%] bg-orange-500 text-black"
-          onClick={() => quack.HELP_SWITCH()}
-        >?</button>
+          <article className="bg-zinc-900 rounded-3xl my-4 flex gap-2 items-center px-4 w-4/5">
+              <button 
+                className="p2 w-[3rem] h-[3rem] my-4 text-2xl rounded-[50%] bg-orange-500 text-black block"
+                onClick={() => quack.HELP_SWITCH()}
+                >?</button>
+               <p className="text-sm text-zinc-500">summary: drag and drop cards, to a prefect place, if top line left 1 card automatic refill. <br/>Survie: empty deck and line.</p>
+            </article>
 
         {state.help && <section className="w-[42rem]">
           <HowToPlay />
