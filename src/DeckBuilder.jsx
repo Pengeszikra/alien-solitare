@@ -15,7 +15,11 @@ export const DeckBuilder = ({deck}) => (
       debug: deck.filter(card => !["DARK", "NEUTRAL", "LIGHT"].includes(card.side)).map(card => card.id).join(),
     }, null, 2)}</pre>
     <section className="grid gap-4 grid-cols-4 ">
-      {deck.map((card) => <Card key={card.id} card={card} />)}
+      {deck.map((card) => 
+        <div key={card.id}>
+          <Card key={card.id} card={card} />
+        </div>
+      )}
     </section>
   </section>
 );

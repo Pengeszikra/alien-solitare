@@ -4,6 +4,8 @@ import { label, reducer, setup } from "./alienDuck";
 import { cardCollection } from "./cardCollections";
 import { delay } from "./utils";
 import { DeckBuilder } from "./DeckBuilder";
+import { GalleryDecider } from "./GalleryDecider";
+import { images } from "./arts";
 
 /** @type {(quack: import('./alienDuck').Quack) => void} */
 const moment = 300;
@@ -16,6 +18,7 @@ const initialSaga = async (quack) => {
 };
 /** @type {(quack: import('./alienDuck').Quack) => void} */
 const storyGoesOnSaga = async (quack) => {
+  quack.CLEAN_TABLE();
   const moment = 300;
   await delay(moment);
   quack.RELEASE_CARD('L1');
@@ -29,8 +32,9 @@ const storyGoesOnSaga = async (quack) => {
   quack.GO_ON("SOLITARE");
 };
 
-export const Target = ({ id }) => (
+export const Target = ({ id, type }) => (
   <section data-zone={id} className="w-[200px] h-[300px] rounded-2xl border border-4 p-4 border-zinc-700 border-dashed">
+    <p className="text-zinc-500">{type}</p>
   </section>
 )
 
@@ -58,12 +62,12 @@ export const Card = ({ card, quack, slotId, phases }) => {
       border-opacity-75
       p-4
       border-zinc-800
-      text-xl
+      text-sm
       bg-zinc-900 
       text-zinc-300
       ${isDrag ? "border-dashed" : ""}
       bg-[linear-gradient(rgba(0,0,0,1),rgba(0,0,0,0)),url('${src}')]
-      bg-height-[20%, 100%]
+      --bg-[url('${src}')]
       bg-bottom
       bg-cover
       bg-no-repeat
@@ -93,7 +97,6 @@ export const Card = ({ card, quack, slotId, phases }) => {
       <p className={`
         pointer-events-none
         text-green-500
-        text-sm
         ${side === "STRANGE" ? "text-rose-400" : ""}
       `}>{work}</p>
     </section>
@@ -107,9 +110,10 @@ export const Card = ({ card, quack, slotId, phases }) => {
  * @param {Partial<import('./alienDuck').TableSpot>} props.slot 
  * @param {import('./alienDuck').Quack} props.quack
  * @param {import('./alienDuck').Phases} props.phases
- * @returns {JSX.Element}
+ * @returnsimport { images } from './arts';
+ {JSX.Element}
  */
-export const Slot = ({ slot: { card, id }, quack, phases }) => {
+export const Slot = ({ slot: { card, id, slot }, quack, phases }) => {
   const [isOver, setOver] = useState(false);
   return (
     <pre className={`text-white ${isOver ? "opacity-50" : ""}`}
@@ -127,7 +131,7 @@ export const Slot = ({ slot: { card, id }, quack, phases }) => {
     >
       {card
         ? <Card card={card} quack={quack} slotId={id} phases={phases} />
-        : <Target id={id} />
+        : <Target id={id} type={slot} />
       }
     </pre>
   );
@@ -173,12 +177,13 @@ export const AlienSolitare = () => {
         </pre>
 
         <section className="grid gap-4 grid-cols-1 place-items-start">
-          <section className="grid gap-4 grid-cols-4">
+          <section className="grid gap-4 grid-cols-5">
             {[
               state.table.L1,
               state.table.L2,
               state.table.L3,
-              state.table.L4
+              state.table.L4,
+              state.table.DROP
             ].map(slot => <Slot key={slot.id} slot={slot} quack={quack} phases={state.phases} />)}
           </section>
           <section className="grid gap-4 grid-cols-4">
@@ -193,26 +198,37 @@ export const AlienSolitare = () => {
 
         {state.phases === "BURN_OUT" && (
           <article onClick={() => quack.GO_ON("BEGIN")} className="bg-red-800 rounded-2xl text-white text-3xl p-8 absolute z-10 top-36 left-8 w-[800px] select-none">
-            Mission was failed, captain you are Burn Out! 
-            <img src="Z0eTLnOV.jpg" className="my-4"/>
+            Mission was failed, captain you are Burn Out!
+            <img src="Z0eTLnOV.jpg" className="my-4" />
             <p className="text-sm">Use the reset please (Ctrl + R)</p>
           </article>
-        )} 
+        )}
 
         {state.phases === "SURVIVE" && (
           <article onClick={() => quack.GO_ON("BEGIN")} className="bg-green-800 rounded-2xl text-white text-3xl p-8 absolute z-10 top-36 left-8 w-[800px] select-none">
             Congratulation captain 4 Mission!
-            <img src="tFJJ4ggf.jpg" className="my-4"/>
+            <img src="tFJJ4ggf.jpg" className="my-4" />
             <p className="text-sm">Use the reset please (Ctrl + R)</p>
           </article>
-        )} 
+        )}
 
-        <pre className="pointer-events-none select-none --hidden">
+        <pre className="pointer-events-none select-none hidden">
           <p className="text-green-700 py-4">Near to a first working gameplay, just I documenting a lot.</p>
           {JSON.stringify({ ...state, deck: state.deck.length }, null, 2)}
         </pre>
 
         {/* <DeckBuilder deck={state.deck} /> */}
+
+        {false && (
+          <GalleryDecider deck={[
+            ...cardCollection,
+          ].map((card, index) => ({ ...card, src: images[index] }))} />
+        )}
+
+        <article className="my-8">
+          <h1 className="text-3xl" >How to play</h1>
+          <p>this section can fill by AI ... will coming </p>
+        </article>
 
       </article>
     </main>

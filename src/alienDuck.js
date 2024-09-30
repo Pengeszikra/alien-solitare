@@ -29,7 +29,7 @@ import { images } from "./arts";
  * Keys of Slots or Spots I was mixing this a bit.
  * TODO: L5, L6, A3, S2 :: Space-ship / Location dynamic table size feature
  * 
- *  @typedef { |
+ *  @typedef { 'DROP' |
  *     'L1' | 'L2' | 'L3' | 'L4' | 'L5' | 'L6' | 
  *   'HERO' | 'A1' | 'A2' | 'A3' | 'S1' | 'S2'
  * } SlotId
@@ -84,6 +84,7 @@ import { images } from "./arts";
  * { type: "DRAG_END", payload: SlotId } |
  * { type: "PLAY_CARD", payload: {actor:Card, slotId:SlotId } } |
  * { type: "GO_ON", payload: Phases } |
+ * { type: "CLEAN_TABLE" } |
  * { type: "WHAT_IS_NEXT" }
  * } Actions
  */
@@ -103,15 +104,21 @@ export const label = {
   DRAG_END: "DRAG_END",
   GO_ON: "GO_ON",
   WHAT_IS_NEXT: "WHAT_IS_NEXT",
+  CLEAN_TABLE: "CLEAN_TABLE",
 };
 
-/** @type {(card:Card, slotId: string, state: State) => State} */
+/** 
+ * # Game Rule Manager
+ * 
+ * TODO will write test cases
+ * @type {(card:Card, slotId: string, state: State) => State} 
+ */
 export const playCard = (card, slotId, state) => {
   try {
     console.log(slotId, state.fly)
     const { from, to } = state.fly;
 
-    if (from === to) return {...state, fly: null};
+    if (from === to) return { ...state, fly: null };
 
     /** @typedef {[Slot, Slot, Side, Work]} Move */
 
@@ -129,8 +136,7 @@ export const playCard = (card, slotId, state) => {
           ...state,
           table: {
             ...table,
-            [from]: { ...table[from], card: null },
-            [to]: { ...table[to], card },
+            [from]: { ...table[from], card: null }, [to]: { ...table[to], card },
           },
           fly: null,
           ...extra,
@@ -145,83 +151,179 @@ export const playCard = (card, slotId, state) => {
 
     /** @type {(move:Move) => State} */
     const tableRule = (move) => {
-        console.log('move::', move)
-        const { table } = state;
-        switch (move.join()) {
-          case _(["LINE", "HERO", "STRANGE", "ENGAGE"]): {
-            const captain = table.HERO.card;
-            const [solution, problem] = [captain.power, card.power];
-            const conflict = Math.min(solution, problem);
-            captain.power -= conflict;
-            card.power -= conflict;
+      console.log('move::', move)
+      const { table } = state;
+      switch (move.join()) {
+        case _(["LINE", "HERO", "STRANGE", "ENGAGE"]): {
+          const captain = table.HERO.card;
+          const [solution, problem] = [captain.power, card.power];
+          const conflict = Math.min(solution, problem);
+          captain.power -= conflict;
+          card.power -= conflict;
 
-            return {
-              ...state,
-              table: {
-                ...table,
-                [from]: {...table[from], card: null},
-                HERO: {...table.HERO, card: captain}
-              },
-              lost: [...state.lost, card],
-              fly: null
-            }
+          return {
+            ...state,
+            table: {
+              ...table,
+              [from]: { ...table[from], card: null },
+              HERO: { ...table.HERO, card: captain }
+            },
+            lost: [...state.lost, card],
+            fly: null
           }
-
-          case _(["LINE", "ACTIVE", "STRANGE", "ENGAGE"]):
-            // console.warn('strange engage vs ally');
-            return playOnTable(table);
-
-          case _(["ACTIVE", "LINE", "ALLY", "ENGAGE"]):
-            // console.warn('our fornt will fight for ...');
-            return playOnTable(table);
-
-          case _(["STORE", "ACTIVE", "ALLY", "ENGAGE"]):
-          case _(["STORE", "ACTIVE", "ALLY", "FIX"]):
-          case _(["STORE", "ACTIVE", "ALLY", "GUARD"]):
-          case _(["STORE", "ACTIVE", "ALLY", "SKILL"]):
-            return table[to].card 
-              ? state 
-              : playOnTable(table)
-              ;
-
-          case _(["LINE", "ACTIVE", "NEUTRAL", "WORTH"]):
-          case _(["LINE", "ACTIVE", "ALLY", "WORTH"]):
-            return state.table[to].card 
-              ? state
-              : playOnTable(table, { score: state.score + card.power })
-              ;
-
-          case _(["LINE", "STORE", "ALLY", "FIX"]):
-          case _(["LINE", "STORE", "ALLY", "ENGAGE"]):
-          case _(["LINE", "STORE", "ALLY", "GUARD"]):
-          case _(["LINE", "STORE", "ALLY", "SKILL"]):
-          case _(["LINE", "STORE", "NEUTRAL", "SKILL"]):
-          case _(["LINE", "STORE", "ALLY", "WORTH"]):
-          case _(["LINE", "STORE", "NEUTRAL", "WORTH"]):
-            // console.warn('save to our store');
-            return table[to].card
-              ? state
-              : playOnTable(table);
-              ;
-
-          case _(["LINE", "ACTIVE", "ALLY", "ENGAGE"]):
-          case _(["LINE", "ACTIVE", "ALLY", "GUARD"]):
-            // console.warn('activate engage or guard');
-            return table[to].card
-              ? state
-              : playOnTable(table);
-              ;
-
-          case _(["ACTIVE", "LINE", "ALLY", "SKILL"]):
-          case _(["ACTIVE", "ACTIVE", "ALLY", "SKILL"]):
-          case _(["ACTIVE", "HERO", "ALLY", "SKILL"]):
-          case _(["ACTIVE", "DROP", "ALLY", "SKILL"]):
-          case _(["ACTIVE", "STORE", "ALLY", "SKILL"]):
-            // console.warn('use a skill:', card.name);
-            return playOnTable(table);
-
-          default: return state;
         }
+
+        case _(["LINE", "ACTIVE", "STRANGE", "ENGAGE"]): {
+          // console.warn('strange engage vs ally');
+          const guard = table[to].card;
+          if (guard?.work !== "GUARD") return state;
+
+          const [solution, problem] = [guard.power, card.power];
+          const conflict = Math.min(solution, problem);
+
+          const captain = table.HERO.card;
+          const owerhit = problem > solution
+            ? Math.min(table.HERO.card.power, problem - solution)
+            : 0
+
+          console.warn('OWERHIT:: ', owerhit, captain.power);
+
+          guard.power -= conflict;
+          card.power -= conflict;
+          captain.power -= owerhit;
+
+          return {
+            ...state,
+            table: {
+              ...table,
+              [from]: { ...table[from], card: null },
+              [to]: { ...table[to], card: owerhit ? null : guard },
+              HERO: { ...table.HERO, card: captain }
+            },
+            lost: owerhit
+              ? [...state.lost, card, guard]
+              : [...state.lost, card],
+            fly: null
+          }
+        }
+
+        case _(["ACTIVE", "LINE", "ALLY", "ENGAGE"]): {
+          if (table[to]?.card?.side !== "STRANGE") return state;
+          const strange = table[to].card;
+          const [solution, problem] = [card.power, strange.power];
+          const conflict = Math.min(solution, problem);
+
+          strange.power -= conflict;
+          card.power -= conflict;
+          const lost = [...state.lost];
+          if (strange.power <= 0) lost.push(strange);
+          if (card.power <= 0) lost.push(card)
+
+          return {
+            ...state,
+            table: {
+              ...table,
+              [from]: card.power <= 0
+                ? { ...table[from], card: null }
+                : table[from],
+              [to]: strange.power <= 0
+                ? { ...table[to], card: null }
+                : table[to],
+            },
+            fly: null,
+            lost
+          };
+        }
+
+        case _(["LINE", "ACTIVE", "ALLY", "FIX"]):
+        case _(["STORE", "ACTIVE", "ALLY", "FIX"]): {
+          // captain solution fix aka heal
+          if (table[to].card) return state;
+          const captain = table.HERO.card;
+          const regen = Math.min(captain.maxPower - captain.power, card.power);
+          captain.power += regen;
+          return {
+            ...state,
+            table: {
+              ...table,
+              [from]: { ...table[from], card: null }, [to]: { ...table[to], card },
+              HERO: { ...table.HERO, card: captain }
+            },
+            fly: null,
+          };
+        }
+
+        case _(["STORE", "ACTIVE", "ALLY", "ENGAGE"]):
+        case _(["STORE", "ACTIVE", "ALLY", "GUARD"]):
+        case _(["STORE", "ACTIVE", "ALLY", "SKILL"]):
+          return table[to].card
+            ? state
+            : playOnTable(table)
+            ;
+
+        case _(["LINE", "ACTIVE", "NEUTRAL", "WORTH"]):
+        case _(["LINE", "ACTIVE", "ALLY", "WORTH"]):
+          return state.table[to].card
+            ? state
+            : playOnTable(table, { score: state.score + card.power })
+            ;
+
+        case _(["LINE", "STORE", "ALLY", "FIX"]):
+        case _(["LINE", "STORE", "ALLY", "ENGAGE"]):
+        case _(["LINE", "STORE", "ALLY", "GUARD"]):
+        case _(["LINE", "STORE", "ALLY", "SKILL"]):
+        case _(["LINE", "STORE", "ALLY", "WORTH"]):
+        case _(["LINE", "STORE", "NEUTRAL", "WORTH"]):
+          // console.warn('save to our store');
+          return table[to].card
+            ? state
+            : playOnTable(table);
+          ;
+
+        case _(["LINE", "DROP", "ALLY", "FIX"]):
+        case _(["LINE", "DROP", "ALLY", "SKILL"]):
+        case _(["ACTIVE", "DROP", "ALLY", "SKILL"]):
+        case _(["LINE", "DROP", "ALLY", "GUARD"]):
+        case _(["LINE", "DROP", "ALLY", "ENGAGE"]):
+        case _(["LINE", "DROP", "ALLY", "WORTH"]):
+          return {
+            ...state,
+            table: {
+              ...table,
+              [from]: { ...table[from], card: null },
+            },
+            lost: [...state.lost, card],
+            fly: null,
+          };
+
+        case _(["LINE", "ACTIVE", "ALLY", "ENGAGE"]):
+        case _(["LINE", "ACTIVE", "ALLY", "GUARD"]):
+        case _(["LINE", "ACTIVE", "ALLY", "SKILL"]):
+          // console.warn('activate engage or guard');
+          return table[to].card
+            ? state
+            : playOnTable(table);
+          ;
+
+        case _(["ACTIVE", "LINE", "ALLY", "SKILL"]):
+          return table[to].card
+            ? state
+            : playOnTable({
+              ...table,
+              [to]: table[to].card.side === "STRANGE"
+                ? { ...table[to], card: { ...table[to].card, power: table[to].card.power /= 2 | 0 } }
+                : table[to]
+            }, { lost: [...state.lost, card] });
+
+
+        // case _(["ACTIVE", "ACTIVE", "ALLY", "SKILL"]):
+        // case _(["ACTIVE", "HERO", "ALLY", "SKILL"]):
+        // case _(["ACTIVE", "DROP", "ALLY", "SKILL"]):
+        // case _(["ACTIVE", "STORE", "ALLY", "SKILL"]):
+        //   return playOnTable(table);
+
+        default: return state;
+      }
     };
 
     return tableRule([
@@ -263,16 +365,16 @@ export const checkTheFinalCondition = (state) => {
   const amountOfCard = upperLine.filter(spot => spot.card).length;
 
   if (
-    state.table.HERO?.card?.type === "HERO" && 
+    state.table.HERO?.card?.type === "HERO" &&
     state.table.HERO.card.power <= 0 ||
     state.table.HERO.card.type !== "HERO"
   ) {
-    return {...state, phases: "BURN_OUT"};
+    return { ...state, phases: "BURN_OUT" };
   }
 
-  if (amountOfCard <= 1 && state.deck.length > 0 ) return { ...state, phases: "STORY_GOES_ON" };
+  if (amountOfCard <= 1 && state.deck.length > 0) return { ...state, phases: "STORY_GOES_ON" };
 
-  if (amountOfCard <= 1 && state.deck.length === 0 ) return { ...state, phases: "SURVIVE" };
+  if (amountOfCard <= 1 && state.deck.length === 0) return { ...state, phases: "SURVIVE" };
 
   return state;
 };
@@ -287,7 +389,7 @@ export const reducer = (state, action) => {
     case "RELEASE_CARD": return releaseCard(action.payload, state);
     case "SHUFFLE_DECK": return {
       ...state, deck: [...state.deck.sort(() => (Math.random() > .5 ? -1 : 1))]
-        .slice(0, 12) // TODO remove deck size limit
+        .slice(0, 22) // TODO remove deck size limit
     };
     case "DRAG_START": return { ...state, fly: action.payload };
     case "DRAG_END": return { ...state, fly: { ...state.fly, to: action.payload } };
@@ -296,6 +398,20 @@ export const reducer = (state, action) => {
       : { ...setup }
       ;
     case "WHAT_IS_NEXT": return checkTheFinalCondition(state);
+    case "CLEAN_TABLE": {
+      const worthA1 = ["WORTH", "FIX"].includes(state.table.A1?.card?.work) && state.table.A1.card;
+      const worthA2 = ["WORTH", "FIX"].includes(state.table.A2?.card?.work) && state.table.A2.card;
+      // console.warn('clean ::', worthA1, worthA2);
+      return {
+        ...state,
+        table: {
+          ...state.table,
+          A1: worthA1 ? { ...state.table.A1, card: null } : state.table.A1,
+          A2: worthA2 ? { ...state.table.A2, card: null } : state.table.A2,
+        },
+        lost: [...state.lost, worthA1, worthA2].filter(card => card)
+      }
+    }
     default: return state;
   }
 };
@@ -314,6 +430,7 @@ export const setup = {
     A1: { id: "A1", card: null, slot: "ACTIVE" },
     A2: { id: "A2", card: null, slot: "ACTIVE" },
     S1: { id: "S1", card: null, slot: "STORE" },
+    DROP: { id: "DROP", card: null, slot: "DROP" },
   },
   phases: "BEGIN",
   score: 0,
