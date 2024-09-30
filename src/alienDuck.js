@@ -1,5 +1,3 @@
-import { images } from "./arts";
-
 /**
  * Dictionary
  * 
@@ -195,7 +193,7 @@ export const playCard = (card, slotId, state) => {
           card.power -= conflict;
           captain.power -= owerhit;
 
-          return {
+          const guardResult = {
             ...state,
             table: {
               ...table,
@@ -203,11 +201,14 @@ export const playCard = (card, slotId, state) => {
               [to]: { ...table[to], card: owerhit ? null : guard },
               HERO: { ...table.HERO, card: captain }
             },
+            fly: null,
             lost: owerhit
               ? [...state.lost, card, guard]
               : [...state.lost, card],
-            fly: null
-          }
+          };
+
+          console.warn(guardResult)
+          return guardResult;
         }
 
         case _(["ACTIVE", "LINE", "ALLY", "ENGAGE"]): {

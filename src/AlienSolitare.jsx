@@ -33,8 +33,23 @@ const storyGoesOnSaga = async (quack) => {
   quack.GO_ON("SOLITARE");
 };
 
+const cardWidth = "11rem";
+
 export const Target = ({ id, type }) => (
-  <section data-zone={id} className="w-1/5 min-w-1/5 aspect-[3/4] h-full w-full rounded-2xl border border-4 p-4 border-zinc-700 border-dashed">
+  <section 
+    data-zone={id} 
+    className={`
+      relative
+      w-[${cardWidth}]
+      aspect-[3/5]
+      rounded-2xl
+      border
+      lg:border-4
+      md:border-2
+      p-4
+      border-zinc-700
+      border-dashed
+    `}>
     <p className="text-zinc-500">{type}</p>
   </section>
 )
@@ -55,13 +70,13 @@ export const Card = ({ card, quack, slotId, phases }) => {
       data-zone={id}
       className={`
       relative
-      w-1/5
-      min-w-1/5
+      w-[${cardWidth}]
       aspect-[3/5]
-      h-full w-full
+      object-cover
       rounded-2xl
       border
-      border-4
+      lg:border-4
+      md:border-2
       border-opacity-75
       p-4
       border-zinc-800
@@ -69,8 +84,8 @@ export const Card = ({ card, quack, slotId, phases }) => {
       bg-zinc-900 
       text-zinc-300
       ${isDrag ? "border-dashed" : ""}
+      overflow-hidden
       bg-[linear-gradient(rgba(0,0,0,1),rgba(0,0,0,0)),url('${src}')]
-      --bg-[url('${src}')]
       bg-bottom
       bg-cover
       bg-no-repeat
@@ -180,8 +195,8 @@ export const AlienSolitare = () => {
           `}
         </pre>
 
-        <section className="grid gap-4 grid-cols-1 place-items-start w-full">
-          <section className="grid gap-4 grid-cols-5">
+        <section className="grid gap-[.5rem] grid-cols-1 place-items-start w-full">
+          <section className="grid gap-[.5rem] grid-cols-5">
             {[
               state.table.L1,
               state.table.L2,
@@ -229,15 +244,15 @@ export const AlienSolitare = () => {
           ].map((card, index) => ({ ...card, src: images[index] }))} />
         )}
 
-          <article className="bg-zinc-900 rounded-3xl my-4 flex gap-2 items-center px-4 w-4/5">
+          <article className="bg-zinc-900 rounded-xl my-4 flex gap-2 items-center px-4 w-[56rem]">
               <button 
-                className="p2 w-[3rem] h-[3rem] my-4 text-2xl rounded-[50%] bg-orange-500 text-black block"
+                className="p2 w-[3rem] h-[3rem] my-4 text-2xl rounded-[50%] bg-orange-900 text-black block"
                 onClick={() => quack.HELP_SWITCH()}
                 >?</button>
                <p className="text-sm text-zinc-500">summary: drag and drop cards, to a prefect place, if top line left 1 card automatic refill. <br/>Survie: empty deck and line.</p>
             </article>
-¬
-        {state.help && <section className="w-[42rem]">
+
+        {state.help && <section className="w-[56rem]">
           <HowToPlay />
         </section>}
 
