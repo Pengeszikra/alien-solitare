@@ -24,8 +24,6 @@ export const HowToPlay = () => {
         </ul>
       </section>
 
-      <img src="public/gKTvxGHc.jpg" className="w-1/2" />
-
       <section className="mb-6">
         <h2 className="text-xl font-semibold mb-2">Phases</h2>
         <ul className="list-disc ml-6">
@@ -63,8 +61,6 @@ export const HowToPlay = () => {
           At the end of each round, the game checks if your hero survives, challenges are solved, and cards remain in the deck. Your score increases based on successful actions, such as defeating enemies or solving problems.
         </p>
       </section>
-
-      <img src="public/5Sym4igk.jpg" className="w-1/2" />
 
       <section className="mb-6">
         <h2 className="text-xl font-semibold mb-2">Special Conditions</h2>

@@ -71,6 +71,7 @@ import { images } from "./arts";
  * table: Table,
  * phases: Phases,
  * score: number,
+ * help: boolean,
  * }} State
  */
 
@@ -85,6 +86,7 @@ import { images } from "./arts";
  * { type: "PLAY_CARD", payload: {actor:Card, slotId:SlotId } } |
  * { type: "GO_ON", payload: Phases } |
  * { type: "CLEAN_TABLE" } |
+ * { type: "HELP_SWITCH" } |
  * { type: "WHAT_IS_NEXT" }
  * } Actions
  */
@@ -105,6 +107,7 @@ export const label = {
   GO_ON: "GO_ON",
   WHAT_IS_NEXT: "WHAT_IS_NEXT",
   CLEAN_TABLE: "CLEAN_TABLE",
+  HELP_SWITCH: "HELP_SWITCH",
 };
 
 /** 
@@ -389,7 +392,7 @@ export const reducer = (state, action) => {
     case "RELEASE_CARD": return releaseCard(action.payload, state);
     case "SHUFFLE_DECK": return {
       ...state, deck: [...state.deck.sort(() => (Math.random() > .5 ? -1 : 1))]
-        .slice(0, 22) // TODO remove deck size limit
+        // .slice(0, 22) // TODO remove deck size limit
     };
     case "DRAG_START": return { ...state, fly: action.payload };
     case "DRAG_END": return { ...state, fly: { ...state.fly, to: action.payload } };
@@ -398,6 +401,7 @@ export const reducer = (state, action) => {
       : { ...setup }
       ;
     case "WHAT_IS_NEXT": return checkTheFinalCondition(state);
+    case "HELP_SWITCH": return {...state, help: !state.help};
     case "CLEAN_TABLE": {
       const worthA1 = ["WORTH", "FIX"].includes(state.table.A1?.card?.work) && state.table.A1.card;
       const worthA2 = ["WORTH", "FIX"].includes(state.table.A2?.card?.work) && state.table.A2.card;
@@ -434,4 +438,5 @@ export const setup = {
   },
   phases: "BEGIN",
   score: 0,
+  help: false,
 }

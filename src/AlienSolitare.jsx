@@ -8,7 +8,6 @@ import { GalleryDecider } from "./GalleryDecider";
 import { images } from "./arts";
 import { HowToPlay } from "./HowToPlay";
 
-
 /** @type {(quack: import('./alienDuck').Quack) => void} */
 const moment = 300;
 const initialSaga = async (quack) => {
@@ -35,7 +34,7 @@ const storyGoesOnSaga = async (quack) => {
 };
 
 export const Target = ({ id, type }) => (
-  <section data-zone={id} className="w-1/5 aspect-[3/4] h-full w-full rounded-2xl border border-4 p-4 border-zinc-700 border-dashed">
+  <section data-zone={id} className="w-1/5 min-w-1/5 aspect-[3/4] h-full w-full rounded-2xl border border-4 p-4 border-zinc-700 border-dashed">
     <p className="text-zinc-500">{type}</p>
   </section>
 )
@@ -57,6 +56,7 @@ export const Card = ({ card, quack, slotId, phases }) => {
       className={`
       relative
       w-1/5
+      min-w-1/5
       aspect-[3/5]
       h-full w-full
       rounded-2xl
@@ -80,7 +80,6 @@ export const Card = ({ card, quack, slotId, phases }) => {
       draggable={!!quack?.DRAG_START && phases == "SOLITARE"}
       onDragStart={() => {
         setDrag(true);
-        // console.log(`start: ${id}`);
         quack.DRAG_START({ actor: card, from: slotId })
       }}
       onDragEnd={() => {
@@ -120,7 +119,6 @@ export const Slot = ({ slot: { card, id, slot }, quack, phases }) => {
   const [isOver, setOver] = useState(false);
   return (
     <pre className={`text-white ${isOver ? "opacity-50" : ""}`}
-      // onDragEnter={p => console.dir(p.target?.attributes?.['data-zone']?.nodeValue)}
       onDragEnter={() => { console.dir(id); setOver(true) }}
       onDragLeave={() => { setOver(false) }}
       onDragOver={(e) => { e.preventDefault() }}
@@ -226,9 +224,14 @@ export const AlienSolitare = () => {
           ].map((card, index) => ({ ...card, src: images[index] }))} />
         )}
 
-        <section className="my-8 w-4/5">
+        <button 
+          className="p2 w-[3rem] h-[3rem] my-4 text-2xl rounded-[50%] bg-orange-500 text-black"
+          onClick={() => quack.HELP_SWITCH()}
+        >?</button>
+
+        {state.help && <section className="w-[42rem]">
           <HowToPlay />
-        </section>
+        </section>}
 
       </article>
     </main>
