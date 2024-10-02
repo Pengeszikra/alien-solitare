@@ -223,18 +223,11 @@ export const AlienSolitare = () => {
         )}
 
         {state.phases === "SURVIVE" && (
-            <div className="absolute z-20 fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50 transition-all duration-500 ease-in-out opacity-0 translate-y-4 modal-show">
-              <div className="bg-white rounded-lg p-8 shadow-lg">
-                <h2 className="text-xl font-bold mb-4">Modal Title</h2>
-                <p>This is a simple modal!</p>
-              </div>
-            </div>
-        )}
-
-        {state.phases === "SURVIVE" && (
           <article onClick={() => quack.GO_ON("BEGIN")} className={`
             bg-green-800 rounded-2xl text-white text-3xl p-8 absolute z-10 top-36 left-8 w-[800px] select-none
-          `}>
+            transform-all duration-300 easy-in-out fixed top-0 left-0
+          `}
+          >
             Congratulation captain 4 Mission!
             <img src="tFJJ4ggf.jpg" className="my-4" />
             <p className="text-sm">Use the reset please (Ctrl + R)</p>
@@ -256,13 +249,12 @@ export const AlienSolitare = () => {
           ].map((card, index) => ({ ...card, src: images[index] }))} />
         )}
 
-        <article className="bg-zinc-900 rounded-xl my-4 flex gap-2 items-center px-4 w-[56rem]">
-          <button
-            className="p2 w-[3rem] h-[3rem] my-4 text-2xl rounded-[50%] bg-orange-900 text-black block"
-            onClick={() => quack.HELP_SWITCH()}
-          >?</button>
+        <button className="bg-zinc-900 rounded-xl my-4 flex gap-2 items-center px-4 w-[56rem]"
+          onClick={() => quack.HELP_SWITCH()}
+        >
+          <div className="p2 w-[3rem] h-[3rem] my-4 text-2xl rounded-[50%] bg-orange-900 text-black grid place-items-center"><p>?</p></div>
           <p className="text-sm text-zinc-500">summary: drag and drop cards, to a prefect place, if top line left 1 card automatic refill. <br />Survie: empty deck and line.</p>
-        </article>
+        </button>
 
         {state.help && <section className="w-[56rem]">
           <HowToPlay />

@@ -187,7 +187,7 @@ export const playCard = (card, slotId, state) => {
             ? Math.min(table.HERO.card.power, problem - solution)
             : 0
 
-          console.warn('OWERHIT:: ', owerhit, captain.power);
+          // console.warn('OWERHIT:: ', owerhit, captain.power);
 
           guard.power -= conflict;
           card.power -= conflict;
