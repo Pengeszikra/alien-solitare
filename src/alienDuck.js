@@ -1,10 +1,10 @@
 /**
  * Dictionary
  * 
- * @typedef {'HERO' | 'ALIEN' | 'SPACE-SHIP' | 'LOCATION' | 'GADGET' | 'STORY'} Kind
+ * @typedef {'HERO' | 'ALIEN' | 'SPACE-SHIP' | 'LOCATION' | 'GADGET' | 'STORY' } Kind
  * @typedef {'GUARD' | 'ENGAGE' | 'FIX' | 'SKILL' | 'WORTH'} Work
  * @typedef {'ALLY' | 'STRANGE' | 'NEUTRAL'} Side
- * @typedef {'LINE' | 'HERO' | 'ACTIVE' | 'STORE' | 'DROP'} Slot
+ * @typedef {'LINE' | 'HERO' | 'ACTIVE' | 'STORE' | 'DROP' | 'DECK' } Slot
  */
 
 /** 
@@ -27,7 +27,7 @@
  * Keys of Slots or Spots I was mixing this a bit.
  * TODO: L5, L6, A3, S2 :: Space-ship / Location dynamic table size feature
  * 
- *  @typedef { 'DROP' | 
+ *  @typedef { 'DECK' | 'DROP' | 
  *     'L1' | 'L2' | 'L3' | 'L4' | 'L5' | 'L6' | 
  *   'HERO' | 'A1' | 'A2' | 'A3' | 'S1' | 'S2'
  * } SlotId
@@ -321,12 +321,6 @@ export const playCard = (card, slotId, state) => {
                 : table[to]
             }, { lost: [...state.lost, card] });
 
-        // case _(["ACTIVE", "ACTIVE", "ALLY", "SKILL"]):
-        // case _(["ACTIVE", "HERO", "ALLY", "SKILL"]):
-        // case _(["ACTIVE", "DROP", "ALLY", "SKILL"]):
-        // case _(["ACTIVE", "STORE", "ALLY", "SKILL"]):
-        //   return playOnTable(table);
-
         default: return state;
       }
     };
@@ -437,7 +431,8 @@ export const setup = {
     A1: { id: "A1", card: null, slot: "ACTIVE" },
     A2: { id: "A2", card: null, slot: "ACTIVE" },
     S1: { id: "S1", card: null, slot: "STORE" },
-    DROP: { id: "DROP", card: null, slot: "DROP" },
+    DROP: { id: "DROP", slot: "DROP", card: null },
+    DECK: { id: "DECK", slot: "DECK", card: null },
   },
   phases: "BEGIN",
   score: 0,

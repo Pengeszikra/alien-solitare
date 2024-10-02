@@ -21,7 +21,7 @@
     "url": "https://github.com/Pengeszikra/alien-solitare"
   },
   "scripts": {
-    "dev": "vite",
+    "start": "vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"

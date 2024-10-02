@@ -3,7 +3,7 @@ import { useDuck } from "jsdoc-duck";
 import { label, reducer, setup } from "./alienDuck";
 import { cardCollection } from "./cardCollections";
 import { delay } from "./utils";
-import { DeckBuilder } from "./DeckBuilder";
+// import { DeckBuilder } from "./DeckBuilder";
 import { GalleryDecider } from "./GalleryDecider";
 import { images } from "./arts";
 import { HowToPlay } from "./HowToPlay";
@@ -50,7 +50,7 @@ export const Target = ({ id, type }) => (
       border-zinc-700
       border-dashed
     `}>
-    <p className="text-zinc-500">{type}</p>
+    <p className="text-zinc-500 select-none">{type}</p>
   </section>
 )
 
@@ -186,23 +186,34 @@ export const AlienSolitare = () => {
     }
   }, [state.fly, state.phases, quack])
 
+  useEffect(() => {
+  }, [state.deck.length, state.lost.length, state.phases, state.score]);
+
   return (
     <main className="bg-black text-zinc-200 --bg-[url('ufo-theory.png')]">
-      <article className="relative p-4">
-        <pre className="pointer-events-none select-none">{`
-      A L I E N - S O L I T A R E
-      powered by: jsdoc-duck       deck: ${state.deck.length} drop: ${state.lost.length} phases: ${state.phases} score: ${state.score}
-          `}
-        </pre>
+      <article className="p-4">
+        <pre className="select-none">A L I E N - S O L I T A R E</pre>
+        <pre className="select-none mb-4">     powered by: <a href="https://www.npmjs.com/package/jsdoc-duck" target="_blank" class="text-sky-500">jsdoc-duck</a></pre>
 
-        <section className="grid gap-[.5rem] grid-cols-1 place-items-start w-full">
-          <section className="grid gap-[.5rem] grid-cols-5">
+        <section className="grid gap-[.5rem] grid-cols-1 place-items-start w-full relative">
+          <section className="grid gap-[.5rem] grid-cols-4">
+            <p></p>
+            <Slot slot={state.table.DECK} quack={quack} phases={state.phases} />
+            <Slot slot={state.table.DROP} quack={quack} phases={state.phases} />
+          </section>
+          <section className="grid gap-[.5rem] grid-cols-4 absolute place-items-center min-w-[46rem] top-[7rem] select-none">
+            <p className="select-none bg-gray-900 text-xl p-2 rounded-xl">{state.phases}</p>
+            <p className="select-none bg-gray-900 text-3xl p-2 rounded-xl">{state.deck.length}</p>
+            <p className="select-none bg-gray-900 text-3xl p-2 rounded-xl">{state.lost.length}</p>
+            <p className="select-none bg-gray-900 text-3xl p-2 rounded-xl">{state.score}</p>
+          </section>
+          <section className="grid gap-[.5rem] grid-cols-4">
             {[
               state.table.L1,
               state.table.L2,
               state.table.L3,
               state.table.L4,
-              state.table.DROP
+
             ].map(slot => <Slot key={slot.id} slot={slot} quack={quack} phases={state.phases} />)}
             {[
               state.table.HERO,
@@ -211,28 +222,32 @@ export const AlienSolitare = () => {
               state.table.S1,
             ].map(slot => <Slot key={slot.id} slot={slot} quack={quack} phases={state.phases} />)}
           </section>
+
+          {state.phases === "BURN_OUT" && (
+            <article onClick={() => quack.GO_ON("BEGIN")} className={`
+              bg-red-800 rounded-2xl text-white text-3xl p-8 select-none
+              absolute z-10 top-[17rem] left-0 w-[46rem] 
+              delay-300:top-[0rem]
+            `}>
+              Mission was failed, captain you are Burn Out!
+              <img src="Z0eTLnOV.jpg" className="my-4" />
+
+              <p className="text-sm">Use the reset please (Ctrl + R) ... just a joke.</p>
+            </article>
+          )}
+
+          {state.phases === "SURVIVE" && (
+            <article onClick={() => quack.GO_ON("BEGIN")} className={`
+            bg-green-800 rounded-2xl text-white text-3xl p-8 select-none
+            transform-all duration-300 easy-in-out absolute z-10 top-0 left-8 w-[44rem]
+            `}
+            >
+              Congratulation captain 4 Mission!
+              <img src="tFJJ4ggf.jpg" className="my-4" />
+              <p className="text-sm">Use the reset please (Ctrl + R)</p>
+            </article>
+          )}
         </section>
-
-        {state.phases === "BURN_OUT" && (
-          <article onClick={() => quack.GO_ON("BEGIN")} className="bg-red-800 rounded-2xl text-white text-3xl p-8 absolute z-10 top-36 left-8 w-[800px] select-none">
-            Mission was failed, captain you are Burn Out!
-            <img src="Z0eTLnOV.jpg" className="my-4" />
-
-            <p className="text-sm">Use the reset please (Ctrl + R) ... just a joke.</p>
-          </article>
-        )}
-
-        {state.phases === "SURVIVE" && (
-          <article onClick={() => quack.GO_ON("BEGIN")} className={`
-            bg-green-800 rounded-2xl text-white text-3xl p-8 absolute z-10 top-36 left-8 w-[800px] select-none
-            transform-all duration-300 easy-in-out fixed top-0 left-0
-          `}
-          >
-            Congratulation captain 4 Mission!
-            <img src="tFJJ4ggf.jpg" className="my-4" />
-            <p className="text-sm">Use the reset please (Ctrl + R)</p>
-          </article>
-        )}
 
         <pre className="pointer-events-none select-none hidden">
           <p className="text-green-700 py-4">Near to a first working gameplay, just I documenting a lot.</p>
@@ -249,7 +264,7 @@ export const AlienSolitare = () => {
           ].map((card, index) => ({ ...card, src: images[index] }))} />
         )}
 
-        <button className="bg-zinc-900 rounded-xl my-4 flex gap-2 items-center px-4 w-[56rem]"
+        <button className="bg-zinc-900 rounded-xl my-4 flex gap-2 items-center px-4 w-[56rem] hidden"
           onClick={() => quack.HELP_SWITCH()}
         >
           <div className="p2 w-[3rem] h-[3rem] my-4 text-2xl rounded-[50%] bg-orange-900 text-black grid place-items-center"><p>?</p></div>
