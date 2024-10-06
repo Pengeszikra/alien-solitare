@@ -130,7 +130,7 @@ export const playCard = (card, slotId, state) => {
       return result;
     };
 
-    /** @type {(tabke:Table, extra:Partial<State>) => State} */
+    /** @type {(table:Table, extra:Partial<State>) => State} */
     const playOnTable = (table, extra = {}) => {
       try {
         const result = ({

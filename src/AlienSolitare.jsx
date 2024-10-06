@@ -190,8 +190,8 @@ export const AlienSolitare = () => {
   }, [state.deck.length, state.lost.length, state.phases, state.score]);
 
   return (
-    <main className="bg-black text-zinc-200 --bg-[url('ufo-theory.png')]">
-      <article className="p-4">
+    <main className="bg-black text-zinc-200 min-h-screen min-w-screen">
+      <article className="p-4 relative max-h-screen aspect-[4/4] mx-auto">
         <pre className="select-none">A L I E N - S O L I T A R E</pre>
         <pre className="select-none mb-4">     powered by: <a href="https://www.npmjs.com/package/jsdoc-duck" target="_blank" class="text-sky-500">jsdoc-duck</a></pre>
 
