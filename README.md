@@ -37,6 +37,10 @@ _duck working according this developer declared type contain all actions with th
  */
 ```
 
+## Feature:
+- responsivity
+- drag n drop reworked to simple click
+
 ## Demo
 <!-- You can directly embed your game and code into this post (see the FAQ section of the challenge page) or you can share links to your game and public repo. -->
 
