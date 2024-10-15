@@ -385,14 +385,14 @@ export const reducer = (state, action) => {
     case "CREATE_DECK": return { ...state, deck: action.payload.filter(c => c.work !== "SKILL").map(card => ({...card, power:card.maxPower})) };
     // case "CREATE_DECK": return { ...state, deck: action.payload.map((card) => ({ ...card, src: images[Math.random() * images.length | 0] })) };
     case "MOVE_CARD": return { ...state, fly: action.payload, table: isPlaybleCheck(action.payload, state.table) };
-    case "PLAY_CARD": return playCard(action.payload.actor, action.payload.slotId, state);
     case "RELEASE_CARD": return releaseCard(action.payload, state);
     case "SHUFFLE_DECK": return {
-      ...state, deck: [...state.deck].sort(() => (Math.random() > .5 ? -1 : 1))
-        // .slice(0, 22) // TODO remove deck size limit
+      ...state, deck: [...state.deck].sort(() => (Math.random() -0.5))
+      // .slice(0, 22) // TODO remove deck size limit
     };
     case "DRAG_START": return { ...state, fly: action.payload };
     case "DRAG_END": return { ...state, fly: { ...state.fly, to: action.payload } };
+    case "PLAY_CARD": return playCard(action.payload.actor, action.payload.slotId, state);
     case "GO_ON": return action.payload !== "BEGIN"
       ? { ...state, phases: action.payload }
       : { ...setup }

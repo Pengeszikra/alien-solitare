@@ -4,8 +4,6 @@ import { label, reducer, setup } from "./alienDuck";
 import { cardCollection } from "./cardCollections";
 import { delay } from "./utils";
 // import { DeckBuilder } from "./DeckBuilder";
-import { GalleryDecider } from "./GalleryDecider";
-import { images } from "./arts";
 import { HowToPlay } from "./HowToPlay";
 
 /** @type {(quack: import('./alienDuck').Quack) => void} */
@@ -35,7 +33,7 @@ const storyGoesOnSaga = async (quack) => {
 
 const cardWidth = "11rem";
 
-export const Target = ({ id, type }) => (
+export const Target = ({ id, type, children }) => (
   <section
     data-zone={id}
     className={`
@@ -43,14 +41,17 @@ export const Target = ({ id, type }) => (
       w-[${cardWidth}]
       aspect-[4/6]
       rounded-2xl
-      border
-      lg:border-4
-      md:border-2
-      p-4
       border-zinc-700
       border-dashed
+      outline-dashed 
+      outline-offset-0
+      hover:outline-offset-4
+      hover:outline-sky-600 hover:outline-2
+      transition-all duration-300
+      outline-zinc-700
     `}>
-    <p className="text-zinc-500 select-none">{type}</p>
+    <p className="text-zinc-500 select-none absolute top-4 left-4">{type}</p>
+    {children}
   </section>
 )
 
@@ -91,6 +92,7 @@ export const Card = ({ card, quack, slotId, phases }) => {
       bg-no-repeat
       hover:text-orange-300
       select-none
+      pointer-events-none
     `}
       draggable={!!quack?.DRAG_START && phases == "SOLITARE"}
       onDragStart={() => {
@@ -130,28 +132,34 @@ export const Card = ({ card, quack, slotId, phases }) => {
  * @param {Partial<import('./alienDuck').TableSpot>} props.slot 
  * @param {import('./alienDuck').Quack} props.quack
  * @param {import('./alienDuck').Phases} props.phases
+ * @param {import('./alienDuck').Phases} props.fly
  * @returnsimport { images } from './arts';
  {JSX.Element}
  */
-export const Slot = ({ slot: { card, id, slot }, quack, phases }) => {
-  const [isOver, setOver] = useState(false);
+export const Slot = ({ slot: { card, id, slot }, quack, phases, fly }) => {
   return (
-    <pre className={`text-white ${isOver ? "opacity-50" : ""}`}
-      onDragEnter={() => { console.dir(id); setOver(true) }}
-      onDragLeave={() => { setOver(false) }}
-      onDragOver={(e) => { e.preventDefault() }}
-      onDrop={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        quack.DRAG_END(id);
-        setOver(false);
-        // console.log(`end: ${id}`, card)
+    <pre className={`text-white ${fly ? "opacity-50" : ""}`}
+      // onDragEnter={() => { console.dir(id); setOver(true) }}
+      // onDragLeave={() => { setOver(false) }}
+      // onDragOver={(e) => { e.preventDefault() }}
+      // onDrop={(e) => {
+      //   e.preventDefault();
+      //   e.stopPropagation();
+      //   quack.DRAG_END(id);
+      //   setOver(false);
+      // }}
+      onClick={() => {
+        if (!fly) {
+          quack.DRAG_START({ actor: card, from: id });
+        } else {
+          quack.DRAG_END(id);
+          quack.PLAY_CARD({ actor: fly.actor, slotId: id })
+        }
       }}
-    >
-      {card
-        ? <Card card={card} quack={quack} slotId={id} phases={phases} />
-        : <Target id={id} type={slot} />
-      }
+      >
+      <Target id={id} type={slot}>
+        {card && <Card card={card} quack={quack} slotId={id} phases={phases} />}
+      </Target>
     </pre>
   );
 }
@@ -193,34 +201,34 @@ export const AlienSolitare = () => {
     <main className="bg-black text-zinc-200 min-h-screen min-w-screen">
       <article className="p-4 relative max-h-screen aspect-[4/4] mx-auto">
         <pre className="select-none">A L I E N - S O L I T A R E</pre>
-        <pre className="select-none mb-4">     powered by: <a href="https://www.npmjs.com/package/jsdoc-duck" target="_blank" class="text-sky-500">jsdoc-duck</a></pre>
+        <pre className="select-none mb-4">     powered by: <a href="https://www.npmjs.com/package/jsdoc-duck" target="_blank" className="text-sky-500">jsdoc-duck</a></pre>
 
         <section className="grid gap-[.5rem] grid-cols-1 place-items-start w-full relative">
-          <section className="grid gap-[.5rem] grid-cols-4">
+          <section className="grid gap-[1rem] grid-cols-4">
             <p></p>
-            <Slot slot={state.table.DECK} quack={quack} phases={state.phases} />
-            <Slot slot={state.table.DROP} quack={quack} phases={state.phases} />
+            <Slot slot={state.table.DECK} quack={quack} phases={state.phases} fly={state.fly}/>
+            <Slot slot={state.table.DROP} quack={quack} phases={state.phases} fly={state.fly}/>
           </section>
-          <section className="grid gap-[.5rem] grid-cols-4 absolute place-items-center min-w-[46rem] top-[7rem] select-none">
+          <section className="grid gap-[1rem] grid-cols-4 absolute place-items-center min-w-[46rem] top-[7rem] select-none pointer-events-none">
             <p className="select-none bg-gray-900 text-xl p-2 rounded-xl">{state.phases}</p>
             <p className="select-none bg-gray-900 text-3xl p-2 rounded-xl">{state.deck.length}</p>
             <p className="select-none bg-gray-900 text-3xl p-2 rounded-xl">{state.lost.length}</p>
             <p className="select-none bg-gray-900 text-3xl p-2 rounded-xl">{state.score}</p>
           </section>
-          <section className="grid gap-[.5rem] grid-cols-4">
+          <section className="grid gap-[1rem] grid-cols-4">
             {[
               state.table.L1,
               state.table.L2,
               state.table.L3,
               state.table.L4,
 
-            ].map(slot => <Slot key={slot.id} slot={slot} quack={quack} phases={state.phases} />)}
+            ].map(slot => <Slot key={slot.id} slot={slot} quack={quack} phases={state.phases} fly={state.fly}/>)}
             {[
               state.table.HERO,
               state.table.A1,
               state.table.A2,
               state.table.S1,
-            ].map(slot => <Slot key={slot.id} slot={slot} quack={quack} phases={state.phases} />)}
+            ].map(slot => <Slot key={slot.id} slot={slot} quack={quack} phases={state.phases} fly={state.fly}/>)}
           </section>
 
           {state.phases === "BURN_OUT" && (
@@ -256,13 +264,13 @@ export const AlienSolitare = () => {
 
         {/* <DeckBuilder deck={state.deck} /> */}
 
-        {false && (
+        {/* {false && (
           <GalleryDecider deck={[
             ...cardCollection,
             ...cardCollection,
             ...cardCollection,
           ].map((card, index) => ({ ...card, src: images[index] }))} />
-        )}
+        )} */}
 
         <button className="bg-zinc-900 rounded-xl my-4 flex gap-2 items-center px-4 w-[56rem] hidden"
           onClick={() => quack.HELP_SWITCH()}
