@@ -139,15 +139,6 @@ export const Card = ({ card, quack, slotId, phases }) => {
 export const Slot = ({ slot: { card, id, slot }, quack, phases, fly }) => {
   return (
     <pre className={`text-white ${fly ? "opacity-50" : ""}`}
-      // onDragEnter={() => { console.dir(id); setOver(true) }}
-      // onDragLeave={() => { setOver(false) }}
-      // onDragOver={(e) => { e.preventDefault() }}
-      // onDrop={(e) => {
-      //   e.preventDefault();
-      //   e.stopPropagation();
-      //   quack.DRAG_END(id);
-      //   setOver(false);
-      // }}
       onClick={() => {
         if (!fly) {
           quack.DRAG_START({ actor: card, from: id });
